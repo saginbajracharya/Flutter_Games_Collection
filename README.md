@@ -1,2 +1,3 @@
-# Flutter_Games_Collection
-Collection of Games with Flutter in one App
+# flutter_games_collection
+
+A new Flutter project.

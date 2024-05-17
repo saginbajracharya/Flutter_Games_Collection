@@ -1,0 +1,35 @@
+name: flutter_games_collection
+description: "Flutter Game Collection. [3.19.5 || 3.22.0]"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.3.3 <4.0.0'
+
+dependencies:
+  flame: ^1.17.0
+  get: ^4.6.6
+  get_storage: ^2.1.1
+  flutter_gradient_colors: ^2.1.1
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/
+    - assets/audio/
+    - assets/images/
+    - assets/images/emberquest/
+    - assets/images/spaceshooter/bullet/
+    - assets/images/spaceshooter/enemies/
+    - assets/images/spaceshooter/explosions/
+    - assets/images/spaceshooter/parallexBg/
+    - assets/images/spaceshooter/player/
+    - assets/images/spaceshooter/ui/
