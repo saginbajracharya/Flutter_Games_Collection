@@ -11,7 +11,7 @@ class EmberQuestAssetImages{
   static const block      = "emberquest/block.png";
   static const ember      = "emberquest/ember.png";
   static const ground     = "emberquest/ground.png";
-  static const halfheart  = "emberquest/heart_half";
+  static const halfheart  = "emberquest/heart_half.png";
   static const heart      = "emberquest/heart.png";
   static const star       = "emberquest/star.png";
   static const waterEnemy = "emberquest/water_enemy.png";
