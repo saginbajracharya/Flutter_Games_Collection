@@ -1,13 +1,14 @@
 import 'dart:math';
+import 'package:get/get.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
+import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_games_collection/managers/segment_manager.dart';
-import 'package:get/get.dart';
 import 'package:flutter_games_collection/common/constant.dart';
 import 'package:flutter_games_collection/common/styles.dart';
 import 'package:flutter_games_collection/widgets/base_scaffold_layout.dart';
@@ -41,10 +42,13 @@ class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
           ElevatedButton(
             onPressed: ()async{
               Get.to(
-                () => const Scaffold(
+                () => Scaffold(
                   body : GameWidget<EmberQuest>.controlled(
                     gameFactory: EmberQuest.new,
-                  )
+                    overlayBuilderMap: {
+                      'GameOver': (_, game) => GameOver(game: game),
+                    },
+                  ),
                 )
               );
             },
@@ -83,6 +87,14 @@ class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
             ),
           ),
           const SizedBox(height: 50),
+          Text(
+            '''
+            Use WASD or Arrow Keys for movement.
+            Space bar to jump.
+            Collect as many stars as you can and avoid enemies!''',
+            textAlign: TextAlign.center,
+            style: normalTextStyle
+          ),
         ],
       ),
     );
@@ -94,23 +106,30 @@ class EmberQuest extends FlameGame with HasCollisionDetection, HasKeyboardHandle
   late UniqueKey lastBlockKey;
   double objectSpeed = 0.0;
   late EmberPlayer _ember;
+  int starsCollected = 0;
+  int health = 3;
 
   @override
   Color backgroundColor() {
-    return const Color.fromARGB(255, 173, 223, 247);
+    return emberQuestBackgroundColor;
   }
 
-  void initializeGame() {
+  void initializeGame(bool loadHud) {
     // Assume that size.x < 3200
     final segmentsToLoad = (size.x / 640).ceil();
     segmentsToLoad.clamp(0, segments.length);
+
     for (var i = 0; i <= segmentsToLoad; i++) {
       loadGameSegments(i, (640 * i).toDouble());
     }
+
     _ember = EmberPlayer(
       position: Vector2(128, canvasSize.y - 128),
     );
-    world.add(_ember);
+    add(_ember);
+    if (loadHud) {
+      add(Hud());
+    }
   }
 
   void loadGameSegments(int segmentIndex, double xPositionOffset) {
@@ -152,6 +171,20 @@ class EmberQuest extends FlameGame with HasCollisionDetection, HasKeyboardHandle
     }
   }
 
+  void reset() {
+    starsCollected = 0;
+    health = 3;
+    initializeGame(false);
+  }
+
+  @override
+  void update(double dt) {
+    if (health <= 0) {
+      overlays.add('GameOver');
+    }
+    super.update(dt);
+  }
+
   @override
   Future<void> onLoad() async {
     await images.loadAll([
@@ -167,7 +200,7 @@ class EmberQuest extends FlameGame with HasCollisionDetection, HasKeyboardHandle
     // of the `CameraComponent`s viewfinder (where the camera is looking)
     // is in the top left corner, that's why we set the anchor here.
     camera.viewfinder.anchor = Anchor.topLeft;
-    initializeGame();
+    initializeGame(true);
   }
 }
 
@@ -181,50 +214,15 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
   
   final Vector2 velocity = Vector2.zero();
   final Vector2 fromAbove = Vector2(0, -1);
-  final double moveSpeed = 200;
-  final double gravity = 15;
-  final double jumpSpeed = 600;
-  final double terminalVelocity = 150;
+  final double gravity = 16;
+  final double jumpSpeed = 800;
+  final double moveSpeed = 250;
+  final double terminalVelocity = 200;
   int horizontalDirection = 0;
-  bool isOnGround = false;
-  bool hasJumped = false;
-  bool hitByEnemy = false;
 
-  @override
-  void update(double dt) {
-    velocity.x = horizontalDirection * moveSpeed;
-    position += velocity * dt;
-    if (horizontalDirection < 0 && scale.x > 0) {
-      flipHorizontally();
-    } else if (horizontalDirection > 0 && scale.x < 0) {
-      flipHorizontally();
-    }
-    // Apply basic gravity
-    velocity.y += gravity;
-    // Determine if ember has jumped
-    if (hasJumped) {
-      if (isOnGround) {
-        velocity.y = -jumpSpeed;
-        isOnGround = false;
-      }
-      hasJumped = false;
-    }
-    // Prevent ember from jumping to crazy fast as well as descending too fast and 
-    // crashing through the ground or a platform.
-    velocity.y = velocity.y.clamp(-jumpSpeed, terminalVelocity);
-    game.objectSpeed = 0;
-    // Prevent ember from going backwards at screen edge.
-    if (position.x - 36 <= 0 && horizontalDirection < 0) {
-      velocity.x = 0;
-    }
-    // Prevent ember from going beyond half screen.
-    if (position.x + 64 >= game.size.x / 2 && horizontalDirection > 0) {
-      velocity.x = 0;
-      game.objectSpeed = -moveSpeed;
-    }
-    position += velocity * dt;
-    super.update(dt);
-  }
+  bool hasJumped = false;
+  bool isOnGround = false;
+  bool hitByEnemy = false;
 
   @override
   void onLoad() {
@@ -248,8 +246,58 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
     horizontalDirection += (keysPressed.contains(LogicalKeyboardKey.keyD) || keysPressed.contains(LogicalKeyboardKey.arrowRight))
     ? 1
     : 0;
-    hasJumped = keysPressed.contains(LogicalKeyboardKey.space);
+    hasJumped = keysPressed.contains(LogicalKeyboardKey.space)||keysPressed.contains(LogicalKeyboardKey.keyW)||keysPressed.contains(LogicalKeyboardKey.arrowUp);
     return true;
+  }
+
+  @override
+  void update(double dt) {
+    velocity.x = horizontalDirection * moveSpeed;
+    game.objectSpeed = 0;
+    // Prevent ember from going backwards at screen edge.
+    if (position.x - 36 <= 0 && horizontalDirection < 0) {
+      velocity.x = 0;
+    }
+    // Prevent ember from going beyond half screen.
+    if (position.x + 64 >= game.size.x / 2 && horizontalDirection > 0) {
+      velocity.x = 0;
+      game.objectSpeed = -moveSpeed;
+    }
+
+    // Apply basic gravity.
+    velocity.y += gravity;
+
+    // Determine if ember has jumped.
+    if (hasJumped) {
+      if (isOnGround) {
+        velocity.y = -jumpSpeed;
+        isOnGround = false;
+      }
+      hasJumped = false;
+    }
+
+    // Prevent ember from jumping to crazy fast.
+    velocity.y = velocity.y.clamp(-jumpSpeed, terminalVelocity);
+
+    // Adjust ember position.
+    position += velocity * dt;
+
+    // If ember fell in pit, then game over.
+    if (position.y > game.size.y + size.y) {
+      game.health = 0;
+    }
+
+    if (game.health <= 0) {
+      removeFromParent();
+    }
+
+    // Flip ember if needed.
+    if (horizontalDirection < 0 && scale.x > 0) {
+      flipHorizontally();
+    } else if (horizontalDirection > 0 && scale.x < 0) {
+      flipHorizontally();
+    }
+    super.update(dt);
   }
 
   @override
@@ -257,23 +305,31 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
     if (other is GroundBlock || other is PlatformBlock) {
       if (intersectionPoints.length == 2) {
         // Calculate the collision normal and separation distance.
-        final mid = (intersectionPoints.elementAt(0) + intersectionPoints.elementAt(1)) / 2;
+        final mid = (intersectionPoints.elementAt(0) +
+                intersectionPoints.elementAt(1)) /
+            2;
+
         final collisionNormal = absoluteCenter - mid;
         final separationDistance = (size.x / 2) - collisionNormal.length;
         collisionNormal.normalize();
+
         // If collision normal is almost upwards,
         // ember must be on ground.
         if (fromAbove.dot(collisionNormal) > 0.9) {
           isOnGround = true;
         }
+
         // Resolve collision by moving ember along
         // collision normal by separation distance.
         position += collisionNormal.scaled(separationDistance);
       }
     }
+
     if (other is Star) {
       other.removeFromParent();
+      game.starsCollected++;
     }
+
     if (other is WaterEnemy) {
       hit();
     }
@@ -284,18 +340,19 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
   // to make it blink.
   void hit() {
     if (!hitByEnemy) {
+      game.health--;
       hitByEnemy = true;
     }
     add(
       OpacityEffect.fadeOut(
-      EffectController(
-        alternate: true,
-        duration: 0.1,
-        repeatCount: 6,
-      ),
+        EffectController(
+          alternate: true,
+          duration: 0.1,
+          repeatCount: 5,
+        ),
       )..onComplete = () {
-        hitByEnemy = false;
-      },
+          hitByEnemy = false;
+        },
     );
   }
 }
@@ -345,6 +402,9 @@ class GroundBlock extends SpriteComponent with HasGameReference<EmberQuest> {
         game.lastBlockXPosition = position.x + size.x - 10;
       }
     }
+    if (game.health <= 0) {
+      removeFromParent();
+    }
     super.update(dt);
   }
 }
@@ -373,7 +433,9 @@ class PlatformBlock extends SpriteComponent with HasGameReference<EmberQuest> {
   void update(double dt) {
     velocity.x = game.objectSpeed;
     position += velocity * dt;
-    if (position.x < -size.x) removeFromParent();
+    if (position.x < -size.x || game.health <= 0) {
+      removeFromParent();
+    }
     super.update(dt);
   }
 }
@@ -410,11 +472,14 @@ class Star extends SpriteComponent with HasGameReference<EmberQuest> {
       ),
     );
   }
+
   @override
   void update(double dt) {
     velocity.x = game.objectSpeed;
     position += velocity * dt;
-    if (position.x < -size.x) removeFromParent();
+    if (position.x < -size.x || game.health <= 0) {
+      removeFromParent();
+    }
     super.update(dt);
   }
 }
@@ -461,7 +526,214 @@ class WaterEnemy extends SpriteAnimationComponent with HasGameReference<EmberQue
   void update(double dt) {
     velocity.x = game.objectSpeed;
     position += velocity * dt;
-    if (position.x < -size.x) removeFromParent();
+    if (position.x < -size.x || game.health <= 0) {
+      removeFromParent();
+    }
     super.update(dt);
+  }
+}
+
+enum HeartState {
+  available,
+  unavailable,
+}
+
+class HeartHealthComponent extends SpriteGroupComponent<HeartState> with HasGameReference<EmberQuest> {
+  final int heartNumber;
+
+  HeartHealthComponent({
+    required this.heartNumber,
+    required super.position,
+    required super.size,
+    super.scale,
+    super.angle,
+    super.anchor,
+    super.priority,
+  });
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    final availableSprite = await game.loadSprite(
+      EmberQuestAssetImages.heart,
+      srcSize: Vector2.all(32),
+    );
+
+    final unavailableSprite = await game.loadSprite(
+      EmberQuestAssetImages.halfheart,
+      srcSize: Vector2.all(32),
+    );
+
+    sprites = {
+      HeartState.available: availableSprite,
+      HeartState.unavailable: unavailableSprite,
+    };
+
+    current = HeartState.available;
+  }
+
+  @override
+  void update(double dt) {
+    if (game.health < heartNumber) {
+      current = HeartState.unavailable;
+    } else {
+      current = HeartState.available;
+    }
+    super.update(dt);
+  }
+}
+
+class Hud extends PositionComponent with HasGameReference<EmberQuest> {
+  Hud({
+    super.position,
+    super.size,
+    super.scale,
+    super.angle,
+    super.anchor,
+    super.children,
+    super.priority = 5,
+  });
+
+  late TextComponent _scoreTextComponent;
+  late AdvancedButtonComponent _buttonComponent;
+
+  @override
+  Future<void> onLoad() async {
+    _scoreTextComponent = TextComponent(
+      text: '${game.starsCollected}',
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          fontSize: 32,
+          color: Color.fromRGBO(10, 10, 10, 1),
+        ),
+      ),
+      anchor: Anchor.center,
+      position: Vector2(game.size.x - 60, 20),
+    );
+    add(_scoreTextComponent);
+    // Load an image for the button skin
+    final buttonImage = await Flame.images.load('common/ui/Back_button_Circle.png');
+
+    // Create a SpriteComponent as the default skin
+    final defaultSkin = SpriteComponent(
+      sprite: Sprite(buttonImage),
+      size: Vector2(50, 50), // Set the size of the button
+    );
+
+    _buttonComponent = AdvancedButtonComponent(
+      position: Vector2(game.size.x/2, 10),
+      defaultSkin: defaultSkin,
+      onPressed: (){
+        Get.back();
+      }
+    );
+    add(_buttonComponent);
+    final starSprite = await game.loadSprite(EmberQuestAssetImages.star);
+    add(
+      SpriteComponent(
+        sprite: starSprite,
+        position: Vector2(game.size.x - 100, 20),
+        size: Vector2.all(32),
+        anchor: Anchor.center,
+      ),
+    );
+
+    for (var i = 1; i <= game.health; i++) {
+      final positionX = 40 * i;
+      await add(
+        HeartHealthComponent(
+          heartNumber: i,
+          position: Vector2(positionX.toDouble(), 20),
+          size: Vector2.all(32),
+        ),
+      );
+    }
+  }
+
+  @override
+  void update(double dt) {
+    _scoreTextComponent.text = '${game.starsCollected}';
+  }
+}
+
+class GameOver extends StatelessWidget {
+  // Reference to parent game.
+  final EmberQuest game;
+  const GameOver({super.key, required this.game});
+
+  @override
+  Widget build(BuildContext context) {
+    const blackTextColor = Color.fromRGBO(0, 0, 0, 1.0);
+    const whiteTextColor = Color.fromRGBO(255, 255, 255, 1.0);
+
+    return Material(
+      color: Colors.transparent,
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(10.0),
+          decoration: const BoxDecoration(
+            color: blackTextColor,
+            borderRadius: BorderRadius.all(
+              Radius.circular(20),
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Game Over',
+                style: TextStyle(
+                  color: whiteTextColor,
+                  fontSize: 24,
+                ),
+              ),
+              const SizedBox(height: 40),
+              SizedBox(
+                width: 200,
+                height: 75,
+                child: ElevatedButton(
+                  onPressed: () {
+                    game.reset();
+                    game.overlays.remove('GameOver');
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: whiteTextColor,
+                  ),
+                  child: const Text(
+                    'Play Again',
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      color: blackTextColor,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: 200,
+                height: 75,
+                child: ElevatedButton(
+                  onPressed: () {
+                    game.overlays.remove('GameOver');
+                    Get.back();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: whiteTextColor,
+                  ),
+                  child: const Text(
+                    'Menu',
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      color: blackTextColor,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

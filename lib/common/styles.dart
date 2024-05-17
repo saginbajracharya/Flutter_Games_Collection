@@ -27,6 +27,8 @@ Color? grey900                 = Colors.grey[900];
 
 const Color scaffoldBgColor    = black;
 
+const Color emberQuestBackgroundColor = Color.fromARGB(255, 173, 223, 247);
+
 // App Styles //
 TextStyle smallTextStyle = const TextStyle(
   color: white,

@@ -26,10 +26,11 @@ flutter:
     - assets/
     - assets/audio/
     - assets/images/
+    - assets/images/common/
+    - assets/images/common/ui/
     - assets/images/emberquest/
     - assets/images/spaceshooter/bullet/
+    - assets/images/spaceshooter/player/
     - assets/images/spaceshooter/enemies/
     - assets/images/spaceshooter/explosions/
     - assets/images/spaceshooter/parallexBg/
-    - assets/images/spaceshooter/player/
-    - assets/images/spaceshooter/ui/

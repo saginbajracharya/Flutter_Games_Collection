@@ -18,8 +18,8 @@ class EmberQuestAssetImages{
 }
 
 class CommonAssetImages{
-  static const playbtn     = "assets/images/spaceshooter/ui/Play_Button_Circle.png";
-  static const pausebtn    = "assets/images/spaceshooter/ui/Pause_Button_Circle.png";
-  static const exitbtn     = "assets/images/spaceshooter/ui/Exit_Button_Circle.png";
-  static const backbtn     = "assets/images/spaceshooter/ui/Back_Button_Circle.png";
+  static const playbtn     = "assets/images/common/ui/Play_Button_Circle.png";
+  static const pausebtn    = "assets/images/common/ui/Pause_Button_Circle.png";
+  static const exitbtn     = "assets/images/common/ui/Exit_Button_Circle.png";
+  static const backbtn     = "assets/images/common/ui/Back_Button_Circle.png";
 }
