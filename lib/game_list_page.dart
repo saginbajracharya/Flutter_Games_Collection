@@ -43,6 +43,14 @@ class _GamesListPageState extends State<GamesListPage> {
             onTap: () async{  
               Get.to(()=>const EmberQuestMenuPage());
             },
+          ),
+          // Ember Quest
+          CustomListItem(
+            trailingText: '3', 
+            titleText: 'Epic TD', 
+            onTap: () async{  
+              Get.to(()=>const EmberQuestMenuPage());
+            },
           )
         ],
       ) 
