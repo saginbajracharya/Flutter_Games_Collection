@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter_games_collection/managers/score_state_manager.dart';
 import 'package:get/get.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -13,6 +14,8 @@ import 'package:flutter_games_collection/common/constant.dart';
 import 'package:flutter_games_collection/common/styles.dart';
 import 'package:flutter_games_collection/widgets/base_scaffold_layout.dart';
 
+final ScoreStateManager scoreStateManager = Get.put(ScoreStateManager());
+
 class EmberQuestMenuPage extends StatefulWidget {
   const EmberQuestMenuPage({super.key});
 
@@ -20,7 +23,7 @@ class EmberQuestMenuPage extends StatefulWidget {
   State<EmberQuestMenuPage> createState() => _EmberQuestMenuPageState();
 }
 
-//Ember Quest Menu Page
+// Ember Quest Menu Page
 class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
   
   @override
@@ -87,11 +90,16 @@ class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
             ),
           ),
           const SizedBox(height: 50),
+          // High Score
+          Obx(()=> Text(
+              'High Score : ${scoreStateManager.savedEmberQuesthighscore()}',
+              style: headingTextStyle,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          const SizedBox(height: 50),
           Text(
-            '''
-            Use WASD or Arrow Keys for movement.
-            Space bar to jump.
-            Collect as many stars as you can and avoid enemies!''',
+            'Use WASD or Arrow Keys for movement.\nSpace bar to jump.\nCollect as many stars as you can and avoid enemies!',
             textAlign: TextAlign.center,
             style: normalTextStyle
           ),
@@ -101,6 +109,7 @@ class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
   }
 }
 
+// Ember Quest Main Game
 class EmberQuest extends FlameGame with HasCollisionDetection, HasKeyboardHandlerComponents{
   late double lastBlockXPosition = 0.0;
   late UniqueKey lastBlockKey;
@@ -204,6 +213,7 @@ class EmberQuest extends FlameGame with HasCollisionDetection, HasKeyboardHandle
   }
 }
 
+// Ember Player
 class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, CollisionCallbacks, HasGameReference<EmberQuest> {
   EmberPlayer({
     required super.position,
@@ -214,10 +224,10 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
   
   final Vector2 velocity = Vector2.zero();
   final Vector2 fromAbove = Vector2(0, -1);
-  final double gravity = 16;
+  final double gravity = 20;
   final double jumpSpeed = 800;
   final double moveSpeed = 250;
-  final double terminalVelocity = 200;
+  final double terminalVelocity = 250;
   int horizontalDirection = 0;
 
   bool hasJumped = false;
@@ -234,7 +244,7 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
         stepTime: 0.12,
       ),
     );
-    add(CircleHitbox());
+    add(CircleHitbox(isSolid: true));
   }
 
   @override
@@ -305,9 +315,7 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
     if (other is GroundBlock || other is PlatformBlock) {
       if (intersectionPoints.length == 2) {
         // Calculate the collision normal and separation distance.
-        final mid = (intersectionPoints.elementAt(0) +
-                intersectionPoints.elementAt(1)) /
-            2;
+        final mid = (intersectionPoints.elementAt(0) + intersectionPoints.elementAt(1)) / 2;
 
         final collisionNormal = absoluteCenter - mid;
         final separationDistance = (size.x / 2) - collisionNormal.length;
@@ -328,6 +336,7 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
     if (other is Star) {
       other.removeFromParent();
       game.starsCollected++;
+      scoreStateManager.updateEmberQuestScore(game.starsCollected);
     }
 
     if (other is WaterEnemy) {
@@ -357,6 +366,7 @@ class EmberPlayer extends SpriteAnimationComponent with KeyboardHandler, Collisi
   }
 }
 
+// Ground
 class GroundBlock extends SpriteComponent with HasGameReference<EmberQuest> {
   final Vector2 gridPosition;
   double xOffset;
@@ -409,6 +419,7 @@ class GroundBlock extends SpriteComponent with HasGameReference<EmberQuest> {
   }
 }
 
+// Platform
 class PlatformBlock extends SpriteComponent with HasGameReference<EmberQuest> {
   final Vector2 velocity = Vector2.zero();
   final Vector2 gridPosition;
@@ -440,6 +451,7 @@ class PlatformBlock extends SpriteComponent with HasGameReference<EmberQuest> {
   }
 }
 
+// Stars
 class Star extends SpriteComponent with HasGameReference<EmberQuest> {
   final Vector2 gridPosition;
   double xOffset;
@@ -484,6 +496,7 @@ class Star extends SpriteComponent with HasGameReference<EmberQuest> {
   }
 }
 
+// Water Enemy
 class WaterEnemy extends SpriteAnimationComponent with HasGameReference<EmberQuest> {
   final Vector2 gridPosition;
   double xOffset;
@@ -533,11 +546,13 @@ class WaterEnemy extends SpriteAnimationComponent with HasGameReference<EmberQue
   }
 }
 
+// Heart State
 enum HeartState {
   available,
   unavailable,
 }
 
+// Heart 
 class HeartHealthComponent extends SpriteGroupComponent<HeartState> with HasGameReference<EmberQuest> {
   final int heartNumber;
 
@@ -583,6 +598,7 @@ class HeartHealthComponent extends SpriteGroupComponent<HeartState> with HasGame
   }
 }
 
+// HUD
 class Hud extends PositionComponent with HasGameReference<EmberQuest> {
   Hud({
     super.position,
@@ -656,6 +672,7 @@ class Hud extends PositionComponent with HasGameReference<EmberQuest> {
   }
 }
 
+// GameOver Overlay
 class GameOver extends StatelessWidget {
   // Reference to parent game.
   final EmberQuest game;

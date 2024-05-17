@@ -5,29 +5,55 @@ import 'package:get/get.dart';
 
 class ScoreStateManager extends GetxController {
   final RxInt _spaceShooterScore = RxInt(0);
-  final RxInt _savedhighscore = RxInt(0);
+  final RxInt _savedSpaceShooterhighscore = RxInt(0);
+  final RxInt _emberQuestScore = RxInt(0);
+  final RxInt _savedEmberQuesthighscore = RxInt(0);
 
   RxInt get spaceShooterScore => _spaceShooterScore;
-  RxInt get savedhighscore => _savedhighscore;
+  RxInt get savedSpaceShooterhighscore => _savedSpaceShooterhighscore;
+
+  RxInt get emberQuestScore => _emberQuestScore;
+  RxInt get savedEmberQuesthighscore => _savedEmberQuesthighscore;
 
 
-  void updateScore(int newScore) {
+  void updateSpaceShooterScore(int newScore) {
     _spaceShooterScore.value = newScore;
-    if(_savedhighscore.value<newScore){
-      saveHighScore(newScore);
+    if(_savedSpaceShooterhighscore.value<newScore){
+      saveSpaceShooterHighScore(newScore);
     }
     update();
   }
 
-  saveHighScore(score){
-    _savedhighscore.value = score;
+  saveSpaceShooterHighScore(score){
+    _savedSpaceShooterhighscore.value = score;
     write(StorageKeys.highScoreSpaceShooterKey, score);
     log('new high score $score');
   }
 
-  readHighScore() async {
+  readSpaceShooterHighScore() async {
     dynamic tempScore = await read(StorageKeys.highScoreSpaceShooterKey);
-    _savedhighscore.value = tempScore??0; 
+    _savedSpaceShooterhighscore.value = tempScore??0; 
+    update();
+  }
+
+
+  void updateEmberQuestScore(int newScore) {
+    _emberQuestScore.value = newScore;
+    if(_savedEmberQuesthighscore.value<newScore){
+      saveEmberQuestHighScore(newScore);
+    }
+    update();
+  }
+
+  saveEmberQuestHighScore(score){
+    _savedEmberQuesthighscore.value = score;
+    write(StorageKeys.highScoreEmberQuestKey, score);
+    log('new high score $score');
+  }
+
+  readEmberQuestHighScore() async {
+    dynamic tempScore = await read(StorageKeys.highScoreEmberQuestKey);
+    _savedEmberQuesthighscore.value = tempScore??0; 
     update();
   }
 }

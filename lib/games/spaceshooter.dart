@@ -32,7 +32,7 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
   void initState() {
     super.initState();
     scoreStateManager.spaceShooterScore.value=0;
-    scoreStateManager.readHighScore();
+    scoreStateManager.readSpaceShooterHighScore();
   }
 
   @override
@@ -174,7 +174,7 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
           const SizedBox(height: 50),
           // High Score
           Obx(()=> Text(
-              'High Score : ${scoreStateManager.savedhighscore()}',
+              'High Score : ${scoreStateManager.savedSpaceShooterhighscore()}',
               style: headingTextStyle,
               textAlign: TextAlign.center,
             ),
@@ -421,13 +421,13 @@ class Enemy extends SpriteAnimationComponent with HasGameReference<SpaceShooterG
       other.removeFromParent();
       game.add(Explosion(position: position));
       // Update score using EventManager
-      scoreStateManager.updateScore(scoreStateManager.spaceShooterScore.value+1);
+      scoreStateManager.updateSpaceShooterScore(scoreStateManager.spaceShooterScore.value+1);
     }
     else if (other is Player) {
       // Update score using EventManager
       game.add(Explosion(position: position));
       removeFromParent(); //remove the enemy from the parent
-      scoreStateManager.updateScore(0); // Reset The Score
+      scoreStateManager.updateSpaceShooterScore(0); // Reset The Score
     }
   }
 }

@@ -4,7 +4,7 @@ final box = GetStorage();
 
 class StorageKeys {
   static const String highScoreSpaceShooterKey = 'spaceshooterhighscore';
-  static const String emberQuestKey            = 'emberquest';
+  static const String highScoreEmberQuestKey   = 'emberquesthighscore';
 }
 
 read(String storageName){
