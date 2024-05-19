@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_games_collection/games/epictd.dart';
 import 'package:get/get.dart';
 import 'package:flutter_games_collection/games/emberquest.dart';
 import 'package:flutter_games_collection/games/spaceshooter.dart';
@@ -26,7 +27,7 @@ class _GamesListPageState extends State<GamesListPage> {
           // Title
           Text('Fluter Games Collection',style: headingTextStyle),
           const SizedBox(height: 20),
-          Text('2 in 1',style: headingTextStyle),
+          Text('3 in 1',style: headingTextStyle),
           const SizedBox(height: 50),
           // Space Shooter
           CustomListItem(
@@ -49,7 +50,7 @@ class _GamesListPageState extends State<GamesListPage> {
             trailingText: '3', 
             titleText: 'Epic TD', 
             onTap: () async{  
-              Get.to(()=>const EmberQuestMenuPage());
+              Get.to(()=>const EpicTdMenuPage());
             },
           )
         ],

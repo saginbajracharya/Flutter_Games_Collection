@@ -17,6 +17,14 @@ class EmberQuestAssetImages{
   static const waterEnemy = "emberquest/water_enemy.png";
 }
 
+class EpicTdAssetImages{
+  static const tower1     = "epictd/tower_1.png";
+  static const tower2     = "epictd/tower_2.png";
+  static const enemy      = "epictd/enemy.png";
+  static const towerBtn   = "epictd/towerButton.png";
+  static const bullet     = "epictd/bullet.png";
+}
+
 class CommonAssetImages{
   static const playbtn     = "assets/images/common/ui/Play_Button_Circle.png";
   static const pausebtn    = "assets/images/common/ui/Pause_Button_Circle.png";

@@ -29,6 +29,7 @@ flutter:
     - assets/images/common/
     - assets/images/common/ui/
     - assets/images/emberquest/
+    - assets/images/epictd/
     - assets/images/spaceshooter/bullet/
     - assets/images/spaceshooter/player/
     - assets/images/spaceshooter/enemies/
