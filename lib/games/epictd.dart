@@ -3,6 +3,7 @@ import 'package:flame/camera.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/extensions.dart';
 import 'package:get/get.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -53,14 +54,24 @@ class _EpicTdMenuPageState extends State<EpicTdMenuPage> {
             onPressed: ()async{
               Get.to(
                 () => Scaffold(
-                  body : GameWidget(
-                    game: EpicTd(),
-                    overlayBuilderMap: {
-                      'HudOverlay': (BuildContext context, EpicTd game) {
-                        return HudOverlayWidget(game: game);
-                      },
+                  body : GestureDetector(
+                    onScaleStart: (details) {
+                      // Handle scale start
+                      EpicTd().handleScaleStart(details);
                     },
-                    initialActiveOverlays: const ['HudOverlay'],
+                    onScaleUpdate: (details) {
+                      // Handle scale update
+                      EpicTd().handleScaleUpdate(details);
+                    },
+                    child: GameWidget(
+                      game: EpicTd(),
+                      overlayBuilderMap: {
+                        'HudOverlay': (BuildContext context, EpicTd game) {
+                          return HudOverlayWidget(game: game);
+                        },
+                      },
+                      initialActiveOverlays: const ['HudOverlay'],
+                    ),
                   )
                 )
               );
@@ -120,6 +131,9 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   double minZoom = 0.5; // Minimum zoom level
   double maxZoom = 2.0; // Maximum zoom level
   double zoomSpeed = 0.05; // Zoom speed
+  Vector2? lastScaleStart;
+  Vector2 cameraPosition = Vector2.zero();
+  double currentScale = 1.0;
 
   TapDownInfo? onTapDownInfo;
   bool _isWaveActive = false;
@@ -127,6 +141,13 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   final towerSelection = TowerSelection([
     TowerData('archer', 'epictd/tower_1.png', 100,80),
     TowerData('cannon', 'epictd/tower_2.png', 150,60),
+    TowerData('1', 'epictd/tower_2.png', 150,90),
+    TowerData('2', 'epictd/tower_2.png', 150,120),
+    TowerData('3', 'epictd/tower_2.png', 150,110),
+    TowerData('4', 'epictd/tower_2.png', 150,85),
+    TowerData('5', 'epictd/tower_2.png', 150,40),
+    TowerData('6', 'epictd/tower_1.png', 100,90),
+    TowerData('7', 'epictd/tower_2.png', 150,30),
   ]);
   late GoalComponent goal;
   final ValueNotifier<int> playerHealthNotifier = ValueNotifier<int>(100);
@@ -175,6 +196,26 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
     _selectedTowerType = towerType;
   }
 
+  void handleScaleStart(ScaleStartDetails details) {
+    lastScaleStart = details.focalPoint.toVector2();
+  }
+
+  void handleScaleUpdate(ScaleUpdateDetails details) {
+    if (details.scale != 1.0) {
+      zoom = (zoom * details.scale).clamp(minZoom, maxZoom);
+      currentScale = details.scale;
+    }
+
+    if (details.focalPointDelta != Offset.zero) {
+      cameraPosition += details.focalPointDelta.toVector2();
+      // camera.snapTo(cameraPosition);
+    }
+  }
+
+  TowerData? getSelectedTowerData(String towerType) {
+    return towerSelection.towers.firstWhereOrNull((tower) => tower.type == towerType);
+  }
+
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
@@ -195,22 +236,24 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
       });
 
       if (!positionOccupied) {
-        final tower = TowerComponent(type: _selectedTowerType)..position = towerPosition;
-        add(tower);
+        final towerData = getSelectedTowerData(_selectedTowerType);
+        if (towerData != null) {
+          final tower = TowerComponent(
+            towerData ,
+            type: _selectedTowerType
+          )..position = towerPosition;
+          add(tower);
+        }
       }
     }
   }
 
   @override
   void render(Canvas canvas) {
-    // Apply zoom to the canvas
     canvas.save();
     canvas.scale(zoom);
-
-    // Render your game elements...
+    canvas.translate(-cameraPosition.x, -cameraPosition.y);
     super.render(canvas);
-
-    // Restore the canvas to its original state
     canvas.restore();
   }
 
@@ -237,18 +280,19 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
 
 class TowerComponent extends SpriteComponent with HasGameRef<EpicTd>,CollisionCallbacks,TapCallbacks{
   final String type;
+  final TowerData tower;
   late double range; // Define the range of the tower
-  late final CircleComponent rangeIndicator;
+  late CircleComponent rangeIndicator;
   double shootCooldown = 1.0; // Time between shots
   double timeSinceLastShot = 0.0;
 
-  TowerComponent({this.type = 'default'}) : super(size: Vector2(20,20));
+  TowerComponent(this.tower,{this.type = 'default'}) : super(size: Vector2(20,20));
 
   @override
   Future<void> onLoad() async {
     range = getRange(type);
     // Load sprite based on towerData.type
-    sprite = await gameRef.loadSprite(getSpritePath(type));
+    sprite = await gameRef.loadSprite(tower.iconPath);
     // anchor = Anchor.center;
 
     // Add range indicator
@@ -520,7 +564,7 @@ class TowerButton extends PositionComponent with TapCallbacks, HasGameRef<EpicTd
     final textPaint = TextPaint(
       style: const TextStyle(
         fontSize: 10, // Set the desired font size
-        color: Colors.white, // Set text color as needed
+        color: white, // Set text color as needed
       ),
     );
 
@@ -562,153 +606,163 @@ class HudOverlayWidget extends StatefulWidget {
 class _HudOverlayWidgetState extends State<HudOverlayWidget> {
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Health display at the top-left corner
-        Positioned(
-          top: 10,
-          left: 10,
-          child: ValueListenableBuilder<int>(
-            valueListenable: widget.game.playerHealthNotifier,
-            builder: (context, health, child) {
-              return Text(
-                'Health: $health',
-                style: const TextStyle(
-                  fontSize: 20,
-                  color: white,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            },
-          ),
-        ),
-
-        // Health display at the top-left corner
-        Positioned(
-          top: 50,
-          left: 10,
-          child: ValueListenableBuilder<int>(
-            valueListenable: widget.game.totalCoin,
-            builder: (context, totalCoin, child) {
-              return Text(
-                'Coin: $totalCoin',
-                style: const TextStyle(
-                  fontSize: 10,
-                  color: white,
-                  fontWeight: FontWeight.bold,
-                ),
-              );
-            },
-          ),
-        ),
-
-        // Start Wave button at the top-center
-        Positioned(
-          top: 10,
-          right: 70,
-          child: GestureDetector(
-            onTap: () => widget.game.startWave(),
-            child: Image.asset(
-              'assets/images/common/ui/Play_button_Circle.png',
-              width: 50,
-              height: 50,
-            ),
-          ),
-        ),
-
-        // Back button at the top-center, offset to the right
-        Positioned(
-          top: 10,
-          right: 10,
-          child: GestureDetector(
-            onTap: () => Get.back(),
-            child: Image.asset(
-              'assets/images/common/ui/Back_button_Circle.png',
-              width: 50,
-              height: 50,
-            ),
-          ),
-        ),
-
-        // Zoom In button at the top-right
-        Positioned(
-          top: 70,
-          right: 10,
-          child: GestureDetector(
-            onTap: () {
-              widget.game.zoom = (widget.game.zoom + widget.game.zoomSpeed).clamp(widget.game.minZoom, widget.game.maxZoom);
-            },
-            child: Image.asset(
-              'assets/images/common/ui/zoom_plus.png',
-              width: 50,
-              height: 50,
-            ),
-          ),
-        ),
-
-        // Zoom Out button below the Zoom In button
-        Positioned(
-          top: 140,
-          right: 10,
-          child: GestureDetector(
-            onTap: () {
-              widget.game.zoom = (widget.game.zoom - widget.game.zoomSpeed).clamp(widget.game.minZoom, widget.game.maxZoom);
-            },
-            child: Image.asset(
-              'assets/images/common/ui/zoom_minus.png',
-              width: 50,
-              height: 50,
-            ),
-          ),
-        ),
-
-        // Tower Selection buttons at the bottom of the screen
-        Positioned(
-          bottom: 0,
-          left: 0,
-          child: Container(
-            width: MediaQuery.of(context).size.width,
-            decoration: const BoxDecoration(
-              color: white,
-              border: Border(
-                top: BorderSide(color: black, width: 2.0), // Adjust the width as needed
-              ),
-            ),
-            child: Row(
-              children: List.generate(widget.game.towerSelection.towers.length, (index) {
-                final tower = widget.game.towerSelection.towers[index];
-                return GestureDetector(
-                  onTap: () {
-                    widget.game.selectTower(tower.type);
-                  },
-                  child: Container(
-                    color: grey200,
-                    margin: const EdgeInsets.only(right:5.0),
-                    padding: const EdgeInsets.all(2),
-                    child: Column(
-                      children: [
-                        Image.asset(
-                          'assets/images/${tower.iconPath}',
-                          width: 50,
-                          height: 50,
-                        ),
-                        Text(
-                          tower.type,
-                          style: smallTextStyleBlack,
-                        ),
-                        Text(
-                          'r : ${tower.range}',
-                          style: smallTextStyleBlack,
-                        )
-                      ],
-                    ),
+    return SafeArea(
+      child: Stack(
+        children: [
+          // Health display at the top-left corner
+          Positioned(
+            top: 10,
+            left: 10,
+            child: ValueListenableBuilder<int>(
+              valueListenable: widget.game.playerHealthNotifier,
+              builder: (context, health, child) {
+                return Text(
+                  'Health: $health',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    color: white,
+                    fontWeight: FontWeight.bold,
                   ),
                 );
-              }),
+              },
             ),
           ),
-        ),
-      ],
+      
+          // Health display at the top-left corner
+          Positioned(
+            top: 50,
+            left: 10,
+            child: ValueListenableBuilder<int>(
+              valueListenable: widget.game.totalCoin,
+              builder: (context, totalCoin, child) {
+                return Text(
+                  'Coin: $totalCoin',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    color: white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                );
+              },
+            ),
+          ),
+      
+          // Start Wave button at the top-center
+          Positioned(
+            top: 10,
+            right: 70,
+            child: GestureDetector(
+              onTap: () => widget.game.startWave(),
+              child: Image.asset(
+                'assets/images/common/ui/Play_Button_Circle.png',
+                width: 50,
+                height: 50,
+              ),
+            ),
+          ),
+      
+          // Back button at the top-center, offset to the right
+          Positioned(
+            top: 10,
+            right: 10,
+            child: GestureDetector(
+              onTap: () => Get.back(),
+              child: Image.asset(
+                'assets/images/common/ui/Back_Button_Circle.png',
+                width: 50,
+                height: 50,
+              ),
+            ),
+          ),
+      
+          // Zoom In button at the top-right
+          Positioned(
+            top: 70,
+            right: 10,
+            child: GestureDetector(
+              onTap: () {
+                widget.game.zoom = (widget.game.zoom + widget.game.zoomSpeed).clamp(widget.game.minZoom, widget.game.maxZoom);
+              },
+              child: Image.asset(
+                'assets/images/common/ui/zoom_plus.png',
+                width: 50,
+                height: 50,
+              ),
+            ),
+          ),
+      
+          // Zoom Out button below the Zoom In button
+          Positioned(
+            top: 140,
+            right: 10,
+            child: GestureDetector(
+              onTap: () {
+                widget.game.zoom = (widget.game.zoom - widget.game.zoomSpeed).clamp(widget.game.minZoom, widget.game.maxZoom);
+              },
+              child: Image.asset(
+                'assets/images/common/ui/zoom_minus.png',
+                width: 50,
+                height: 50,
+              ),
+            ),
+          ),
+      
+          // Tower Selection buttons at the bottom of the screen
+          Positioned(
+            bottom: 0,
+            left: 0,
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              decoration: const BoxDecoration(
+                // color: white,
+                border: Border(
+                  top: BorderSide(color: black, width: 2.0), // Adjust the width as needed
+                ),
+              ),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Row(
+                  children: List.generate(
+                    widget.game.towerSelection.towers.length, 
+                    (index) {
+                      final tower = widget.game.towerSelection.towers[index];
+                      return GestureDetector(
+                        onTap: () {
+                          widget.game.selectTower(tower.type);
+                        },
+                        child: Container(
+                          color: grey200,
+                          margin: const EdgeInsets.only(right:5.0),
+                          padding: const EdgeInsets.all(2),
+                          child: Column(
+                            children: [
+                              Image.asset(
+                                'assets/images/${tower.iconPath}',
+                                width: 50,
+                                height: 50,
+                              ),
+                              Text(
+                                tower.type,
+                                style: smallTextStyleBlack,
+                              ),
+                              Text(
+                                'r : ${tower.range}',
+                                style: smallTextStyleBlack,
+                              )
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    growable: true
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

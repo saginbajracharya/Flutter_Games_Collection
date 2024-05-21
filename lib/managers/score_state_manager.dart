@@ -35,7 +35,7 @@ class ScoreStateManager extends GetxController {
   }
 
   readSpaceShooterHighScore() async {
-    dynamic tempScore = await read(StorageKeys.highScoreSpaceShooterKey);
+    dynamic tempScore = await read(StorageKeys.highScoreSpaceShooterKey)==''?0:await read(StorageKeys.highScoreSpaceShooterKey);
     _savedSpaceShooterhighscore.value = tempScore??0; 
     update();
   }

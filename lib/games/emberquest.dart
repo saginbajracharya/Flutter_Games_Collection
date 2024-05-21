@@ -628,7 +628,7 @@ class Hud extends PositionComponent with HasGameReference<EmberQuest> {
     );
     add(_scoreTextComponent);
     // Load an image for the button skin
-    final buttonImage = await Flame.images.load('common/ui/Back_button_Circle.png');
+    final buttonImage = await Flame.images.load('common/ui/Back_Button_Circle.png');
 
     // Create a SpriteComponent as the default skin
     final defaultSkin = SpriteComponent(
