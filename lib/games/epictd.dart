@@ -1,9 +1,8 @@
 import 'dart:math';
-
+import 'package:flame/camera.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
-import 'package:flame/flame.dart';
 import 'package:get/get.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -57,80 +56,11 @@ class _EpicTdMenuPageState extends State<EpicTdMenuPage> {
                   body : GameWidget(
                     game: EpicTd(),
                     overlayBuilderMap: {
-                      'ScoreOverlay': (context, game) {
-                        return Padding(
-                          padding: const EdgeInsets.only(top:10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    Get.back();
-                                  }, 
-                                  style: ElevatedButton.styleFrom(
-                                    elevation: 0,
-                                    foregroundColor: transparent, 
-                                    backgroundColor: transparent, // Remove default button color
-                                    padding: EdgeInsets.zero, // Remove default button padding
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0), // Add rounded corners
-                                    ),
-                                  ), // Navigate to SpaceShooterGame on tap
-                                  child: Image.asset(
-                                    CommonAssetImages.backbtn,
-                                    width: 50.0,  // Adjust image width as needed
-                                    height: 50.0, // Adjust image height as needed
-                                  ),
-                                )
-                              ),
-                              Align(
-                                alignment: Alignment.topCenter,
-                                child: Obx(() => Padding(
-                                  padding: const EdgeInsets.only(top:12.0),
-                                  child: Text(
-                                      'Score : ${scoreStateManager.spaceShooterScore}',
-                                      style: normalTextStyle,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                ),
-                                ),
-                              ),
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    if(playPauseManager.spaceShooterPaused.value == true){
-                                      playPauseManager.play();
-                                    }
-                                    else{
-                                      playPauseManager.pause();
-                                    }
-                                  }, 
-                                  style: ElevatedButton.styleFrom(
-                                    elevation: 0,
-                                    foregroundColor: transparent, backgroundColor: transparent,
-                                    padding: EdgeInsets.zero,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                    ),
-                                  ), 
-                                  // Navigate to SpaceShooterGame on tap
-                                  child: Obx(() => Image.asset(
-                                    playPauseManager.spaceShooterPaused.value?CommonAssetImages.playbtn:CommonAssetImages.pausebtn,
-                                    width: 50.0,
-                                    height: 50.0,
-                                  )),
-                                )
-                              ),
-                            ],
-                          ),
-                        );
+                      'HudOverlay': (BuildContext context, EpicTd game) {
+                        return HudOverlayWidget(game: game);
                       },
                     },
+                    initialActiveOverlays: const ['HudOverlay'],
                   )
                 )
               );
@@ -172,13 +102,13 @@ class _EpicTdMenuPageState extends State<EpicTdMenuPage> {
             ),
           ),
           const SizedBox(height: 50),
-          // High Score
-          // Obx(()=> Text(
-          //     'High Score : ${scoreStateManager.savedSpaceShooterhighscore()}',
-          //     style: headingTextStyle,
-          //     textAlign: TextAlign.center,
-          //   ),
-          // ),
+          // Total Coin
+          Obx(()=> Text(
+              'Coin : ${scoreStateManager.savedSpaceShooterhighscore()}',
+              style: headingTextStyle,
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );
@@ -199,12 +129,20 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
     TowerData('cannon', 'epictd/tower_2.png', 150,60),
   ]);
   late GoalComponent goal;
-  double playerHealth = 100;
-  double reducePlayerHealth = 1;
+  final ValueNotifier<int> playerHealthNotifier = ValueNotifier<int>(100);
+  int defaultReducePlayerHealth = 1;
+  int defaultTakeHealthDamage = 50;
+  final ValueNotifier<int> totalCoin = ValueNotifier<int>(0);
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
+
+    // Center the camera on the game world
+    final fixedResolutionViewport = FixedResolutionViewport(
+      resolution: Vector2(size.x, size.y),
+    );
+    camera.viewport = fixedResolutionViewport;
 
     // Load assets
     await images.loadAll([
@@ -214,7 +152,6 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
     ]);
     goal = GoalComponent()..position = Vector2(size.x/2, size.y/1.1);
     add(goal);
-    add(HudOverlay());
   }
 
   void startWave() {
@@ -227,7 +164,7 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   void addWave() {
     Future.delayed(const Duration(seconds: 1), () {
       if (_isWaveActive) {
-        final enemy = EnemyComponent(goal)..position = Vector2(0, 100);
+        final enemy = EnemyComponent(goal)..position = Vector2(size.x/2, 0);
         add(enemy);
         addWave();
       }
@@ -241,25 +178,22 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   @override
   void onTapDown(TapDownEvent event) {
     super.onTapDown(event);
-    // Handle zoom in and out
+
     final tapPosition = event.localPosition;
     if (tapPosition.x < 50 && tapPosition.y < 50) {
-      // Zoom in when tapping in the top left corner
       zoom = (zoom + zoomSpeed).clamp(minZoom, maxZoom);
     } else if (tapPosition.x > size.x - 50 && tapPosition.y < 50) {
-      // Zoom out when tapping in the top right corner
       zoom = (zoom - zoomSpeed).clamp(minZoom, maxZoom);
     } else {
-      // Place tower if not zooming
-      // Check if a tower already exists at this position...
       final towerPosition = event.localPosition;
-      // Check if a tower already exists at this position
+
       bool positionOccupied = children.any((child) {
         if (child is TowerComponent) {
-          return child.position.distanceTo(towerPosition) < 64; // Adjust distance as needed
+          return child.position.distanceTo(towerPosition) < 64;
         }
         return false;
       });
+
       if (!positionOccupied) {
         final tower = TowerComponent(type: _selectedTowerType)..position = towerPosition;
         add(tower);
@@ -292,24 +226,23 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
     onTapDownInfo = null;
   }
 
-  void reduceHealth(double amount) {
-    if(playerHealth==0.0){
+  void reduceHealth(int amount) {
+    if (playerHealthNotifier.value == 0) {
       Get.back();
-    }
-    else{
-      playerHealth -= amount;
+    } else {
+      playerHealthNotifier.value -= amount;
     }
   }
 }
 
-class TowerComponent extends SpriteComponent with HasGameRef<EpicTd>,CollisionCallbacks {
+class TowerComponent extends SpriteComponent with HasGameRef<EpicTd>,CollisionCallbacks,TapCallbacks{
   final String type;
   late double range; // Define the range of the tower
   late final CircleComponent rangeIndicator;
   double shootCooldown = 1.0; // Time between shots
   double timeSinceLastShot = 0.0;
 
-  TowerComponent({this.type = 'default'}) : super(size: Vector2(64, 64));
+  TowerComponent({this.type = 'default'}) : super(size: Vector2(20,20));
 
   @override
   Future<void> onLoad() async {
@@ -324,7 +257,7 @@ class TowerComponent extends SpriteComponent with HasGameRef<EpicTd>,CollisionCa
       paint: Paint()..color = blue.withOpacity(0.2),
       anchor: Anchor.center,
     );
-    rangeIndicator.position = size/2.1;
+    rangeIndicator.position = size/2.14;
 
     add(rangeIndicator);
     add(RectangleHitbox(collisionType: CollisionType.passive)); // Make the tower passively block movement
@@ -372,6 +305,12 @@ class TowerComponent extends SpriteComponent with HasGameRef<EpicTd>,CollisionCa
     final bullet = BulletComponent(enemy.position, position: position, range: getRange(type));
     gameRef.add(bullet);
   }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    removeFromParent();
+  }
 }
 
 class BulletComponent extends SpriteAnimationComponent with HasGameRef<EpicTd>, CollisionCallbacks {
@@ -382,7 +321,7 @@ class BulletComponent extends SpriteAnimationComponent with HasGameRef<EpicTd>, 
 
   BulletComponent(this.targetPosition, {Vector2? position, this.range = 100})
   : startPosition = position ?? Vector2.zero(),
-  super(size: Vector2(25, 50), position: position ?? Vector2.zero(), anchor: Anchor.center);
+  super(size: Vector2(10, 10), position: position ?? Vector2.zero(), anchor: Anchor.center);
 
   @override
   Future<void> onLoad() async {
@@ -392,7 +331,7 @@ class BulletComponent extends SpriteAnimationComponent with HasGameRef<EpicTd>, 
       SpriteAnimationData.sequenced(
         amount: 1, // Number of frames in the animation
         stepTime: 0.5, // Time interval between frames
-        textureSize: Vector2(20, 20), // Size of each frame
+        textureSize: Vector2(40, 40), // Size of each frame
       ),
     );
 
@@ -417,7 +356,7 @@ class BulletComponent extends SpriteAnimationComponent with HasGameRef<EpicTd>, 
       position += direction * speed * dt;
       // Check if bullet collides with the enemy
       if (closestEnemy.position.distanceTo(position) < 5) {
-        closestEnemy.takeDamage(1);
+        closestEnemy.takeDamage(game.defaultTakeHealthDamage);
         removeFromParent();
       }
     } else {
@@ -434,6 +373,8 @@ class BulletComponent extends SpriteAnimationComponent with HasGameRef<EpicTd>, 
 class EnemyComponent extends SpriteComponent with HasGameRef<EpicTd> ,CollisionCallbacks{
   final GoalComponent goal;
   double health = 100;
+  double maxHealth = 100; // Maximum health of the enemy
+  late dynamic healthBar; // Health bar component
 
   EnemyComponent(this.goal) : super(size: Vector2(32, 32));
 
@@ -442,6 +383,17 @@ class EnemyComponent extends SpriteComponent with HasGameRef<EpicTd> ,CollisionC
     sprite = await gameRef.loadSprite(EpicTdAssetImages.enemy);
     anchor = Anchor.center;
     add(RectangleHitbox()..collisionType = CollisionType.active);
+
+    // Initialize the health bar
+    healthBar = HealthBarComponent(
+      position: Vector2(0, -5), // Position it above the enemy
+      size: Vector2(size.x, 5), // Full width of the enemy and 5 pixels tall
+      fillColor: Colors.green,
+      borderColor: Colors.black,
+      borderWidth: 1.0,
+      anchor: Anchor.topLeft,
+    );
+    add(healthBar);
   }
 
   @override
@@ -452,26 +404,54 @@ class EnemyComponent extends SpriteComponent with HasGameRef<EpicTd> ,CollisionC
     position += direction * 50 * dt; // Move enemy to the goal
 
     if (position.distanceTo(goal.position) < 32) {
-      gameRef.reduceHealth(gameRef.reducePlayerHealth);
+      gameRef.reduceHealth(gameRef.defaultReducePlayerHealth);
       removeFromParent();
     }
+
+    // Update the health bar width based on the current health
+    healthBar.size = Vector2((health / maxHealth) * size.x, healthBar.size.y);
   }
 
-  void takeDamage(double damage) {
+  void takeDamage(int damage) {
     health -= damage;
     if (health <= 0) {
       removeFromParent();
+      game.totalCoin.value += 1;
     }
   }
 
-  @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollision(intersectionPoints, other);
+}
 
-    if (other is TowerComponent) {
-      // Adjust the position or stop the enemy
-      position -= (goal.position - position).normalized() * 50 * x;
-    }
+class HealthBarComponent extends ShapeComponent {
+  HealthBarComponent({
+    required Vector2 position,
+    required Vector2 size,
+    required Color fillColor,
+    required Color borderColor,
+    required Anchor anchor,
+    double borderWidth = 1.0, 
+  }) : super(
+          position: position,
+          size: size,
+          paint: Paint()
+            ..color = fillColor
+            ..style = PaintingStyle.fill,
+        ) {
+    border = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = borderWidth;
+  }
+
+  late final Paint border;
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    final Rect rect = Rect.fromLTWH(0, 0, size.x, size.y);
+    final RRect rrect = RRect.fromRectAndRadius(rect, const Radius.circular(3.0));
+    canvas.drawRRect(rrect, paint);
+    canvas.drawRRect(rrect, border);
   }
 }
 
@@ -570,106 +550,165 @@ class TowerData {
   TowerData(this.type, this.iconPath, this.cost,this.range);
 }
 
-class HudOverlay extends Component with HasGameReference<EpicTd> {
-  late AdvancedButtonComponent _startWaveButton;
-  late AdvancedButtonComponent _backButton;
-  late List<TowerButton> _towerSelectionButtons;
-  late TextComponent healthText;
-  late dynamic towerSelection;
+class HudOverlayWidget extends StatefulWidget {
+  final EpicTd game;
+
+  const HudOverlayWidget({super.key, required this.game});
 
   @override
-  Future<void> onLoad() async {
-    super.onLoad();
-    towerSelection = game.towerSelection;
-    healthText = TextComponent(
-      text: 'Health: ${game.playerHealth}', // Replace with actual health variable
-      anchor: Anchor.topLeft,
-    );
-    // Start Wave Button
-    final buttonImage = await Flame.images.load('common/ui/Play_button_Circle.png');
-    final defaultSkin = SpriteComponent(
-      sprite: Sprite(buttonImage),
-      size: Vector2(50, 50),
-    );
-
-    _startWaveButton = AdvancedButtonComponent(
-      position: Vector2(game.size.x / 2 - 25, 10), 
-      defaultSkin: defaultSkin,
-      onPressed: () {
-        game.startWave();
-      },
-    );
-
-    // Back Button
-    final backButtonImage = await Flame.images.load('common/ui/Back_button_Circle.png');
-    final defaultBackBtnSkin = SpriteComponent(
-      sprite: Sprite(backButtonImage),
-      size: Vector2(50, 50),
-    );
-    _backButton = AdvancedButtonComponent(
-      position: Vector2(game.size.x / 2 + 25, 10),
-      defaultSkin: defaultBackBtnSkin,
-      onPressed: () {
-        Get.back();
-      },
-    );
-    
-    // Tower Selection Buttons
-    _towerSelectionButtons = [];
-    for (var i = 0; i < towerSelection.towers.length; i++) {
-      final tower = towerSelection.towers[i];
-      final button = TowerButton(
-        tower,
-        i,
-        (selectedTowerType) {
-          game.selectTower(selectedTowerType);
-          // towerSelection.selectTower(tower);
-        },
-      );
-      button.position = calculateButtonPosition(i);
-      _towerSelectionButtons.add(button);
-    }
-
-    // Adjust healthText position as needed
-    healthText.position = Vector2(10.0, 10.0);
-    _startWaveButton.position = Vector2(
-      game.size.x - _startWaveButton.width - 10.0, // Use width instead of preferredSize
-      10.0,
-    );
-
-    _backButton.position = Vector2(
-      game.size.x - _backButton.width - 60.0, // Use width instead of preferredSize
-      10.0,
-    );
-
-    add(healthText);
-    add(_startWaveButton);
-    add(_backButton);
-    for (final button in _towerSelectionButtons) {
-      add(button);
-    }
-  }
-
-  @override
-  void update(double dt) {
-    super.update(dt);
-    // Update healthText based on actual health (replace with your logic)
-    healthText.text = 'Health: ${game.playerHealth}'; // Assuming playerHealth exists in EpicTd
-  }
-
-  Vector2 calculateButtonPosition(int index) {
-    const buttonWidth = 60.0; // Assuming all buttons have same width
-    const buttonSpacing = 0.0; // Adjust spacing between buttons
-
-    // Calculate x position starting from the left edge
-    final xPosition = (index * (buttonWidth + buttonSpacing));
-
-    // Calculate y position to be at the bottom with padding
-    final yPosition = game.size.y - buttonWidth - 0.0;
-
-    return Vector2(xPosition, yPosition);
-  }
+  State<HudOverlayWidget> createState() => _HudOverlayWidgetState();
 }
 
+class _HudOverlayWidgetState extends State<HudOverlayWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Health display at the top-left corner
+        Positioned(
+          top: 10,
+          left: 10,
+          child: ValueListenableBuilder<int>(
+            valueListenable: widget.game.playerHealthNotifier,
+            builder: (context, health, child) {
+              return Text(
+                'Health: $health',
+                style: const TextStyle(
+                  fontSize: 20,
+                  color: white,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
+        ),
 
+        // Health display at the top-left corner
+        Positioned(
+          top: 50,
+          left: 10,
+          child: ValueListenableBuilder<int>(
+            valueListenable: widget.game.totalCoin,
+            builder: (context, totalCoin, child) {
+              return Text(
+                'Coin: $totalCoin',
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: white,
+                  fontWeight: FontWeight.bold,
+                ),
+              );
+            },
+          ),
+        ),
 
+        // Start Wave button at the top-center
+        Positioned(
+          top: 10,
+          right: 70,
+          child: GestureDetector(
+            onTap: () => widget.game.startWave(),
+            child: Image.asset(
+              'assets/images/common/ui/Play_button_Circle.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ),
+
+        // Back button at the top-center, offset to the right
+        Positioned(
+          top: 10,
+          right: 10,
+          child: GestureDetector(
+            onTap: () => Get.back(),
+            child: Image.asset(
+              'assets/images/common/ui/Back_button_Circle.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ),
+
+        // Zoom In button at the top-right
+        Positioned(
+          top: 70,
+          right: 10,
+          child: GestureDetector(
+            onTap: () {
+              widget.game.zoom = (widget.game.zoom + widget.game.zoomSpeed).clamp(widget.game.minZoom, widget.game.maxZoom);
+            },
+            child: Image.asset(
+              'assets/images/common/ui/zoom_plus.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ),
+
+        // Zoom Out button below the Zoom In button
+        Positioned(
+          top: 140,
+          right: 10,
+          child: GestureDetector(
+            onTap: () {
+              widget.game.zoom = (widget.game.zoom - widget.game.zoomSpeed).clamp(widget.game.minZoom, widget.game.maxZoom);
+            },
+            child: Image.asset(
+              'assets/images/common/ui/zoom_minus.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ),
+
+        // Tower Selection buttons at the bottom of the screen
+        Positioned(
+          bottom: 0,
+          left: 0,
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            decoration: const BoxDecoration(
+              color: white,
+              border: Border(
+                top: BorderSide(color: black, width: 2.0), // Adjust the width as needed
+              ),
+            ),
+            child: Row(
+              children: List.generate(widget.game.towerSelection.towers.length, (index) {
+                final tower = widget.game.towerSelection.towers[index];
+                return GestureDetector(
+                  onTap: () {
+                    widget.game.selectTower(tower.type);
+                  },
+                  child: Container(
+                    color: grey200,
+                    margin: const EdgeInsets.only(right:5.0),
+                    padding: const EdgeInsets.all(2),
+                    child: Column(
+                      children: [
+                        Image.asset(
+                          'assets/images/${tower.iconPath}',
+                          width: 50,
+                          height: 50,
+                        ),
+                        Text(
+                          tower.type,
+                          style: smallTextStyleBlack,
+                        ),
+                        Text(
+                          'r : ${tower.range}',
+                          style: smallTextStyleBlack,
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

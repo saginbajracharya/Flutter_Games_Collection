@@ -5,6 +5,7 @@ final box = GetStorage();
 class StorageKeys {
   static const String highScoreSpaceShooterKey = 'spaceshooterhighscore';
   static const String highScoreEmberQuestKey   = 'emberquesthighscore';
+  static const String epicTdCoinKey            = 'epicTdCoin';
 }
 
 read(String storageName){
