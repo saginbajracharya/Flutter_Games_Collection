@@ -137,6 +137,9 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
 
   TapDownInfo? onTapDownInfo;
   bool _isWaveActive = false;
+  int _currentWave = 0;
+  int _enemyHealth = 100; // Base health of enemies
+  int _enemySpeed = 50; // Base speed of enemies
   String _selectedTowerType = 'default';
   final towerSelection = TowerSelection([
     TowerData('archer', 'epictd/tower_1.png', 100,80),
@@ -178,6 +181,9 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   void startWave() {
     if (!_isWaveActive) {
       _isWaveActive = true;
+      _currentWave++;
+      _enemyHealth += 20 * _currentWave; // Increase health with each wave
+      _enemySpeed += 10 * _currentWave; // Increase speed with each wave
       addWave();
     }
   }
@@ -185,9 +191,20 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   void addWave() {
     Future.delayed(const Duration(seconds: 1), () {
       if (_isWaveActive) {
-        final enemy = EnemyComponent(goal)..position = Vector2(size.x/2, 0);
+        final enemy = EnemyComponent(goal, _enemyHealth, _enemySpeed)
+          ..position = Vector2(size.x / 2, 0);
         add(enemy);
-        addWave();
+
+        // Add more enemies to make the wave stronger
+        for (int i = 0; i < _currentWave; i++) {
+          final enemy = EnemyComponent(goal, _enemyHealth, _enemySpeed)
+            ..position = Vector2(size.x / 2, -i * 60);
+          add(enemy);
+        }
+
+        _isWaveActive = false;
+        // Delay before starting the next wave
+        Future.delayed(const Duration(seconds: 5), startWave);
       }
     });
   }
@@ -416,11 +433,20 @@ class BulletComponent extends SpriteAnimationComponent with HasGameRef<EpicTd>, 
 
 class EnemyComponent extends SpriteComponent with HasGameRef<EpicTd> ,CollisionCallbacks{
   final GoalComponent goal;
-  double health = 100;
-  double maxHealth = 100; // Maximum health of the enemy
-  late dynamic healthBar; // Health bar component
+  int health;
+  int maxHealth;
+  int speed;
+  late dynamic healthBar;
 
-  EnemyComponent(this.goal) : super(size: Vector2(32, 32));
+  EnemyComponent(
+    this.goal, 
+    this.health, 
+    this.speed
+  )
+  : maxHealth = health,
+  super(
+    size: Vector2(32, 32)
+  );
 
   @override
   Future<void> onLoad() async {
@@ -432,8 +458,8 @@ class EnemyComponent extends SpriteComponent with HasGameRef<EpicTd> ,CollisionC
     healthBar = HealthBarComponent(
       position: Vector2(0, -5), // Position it above the enemy
       size: Vector2(size.x, 5), // Full width of the enemy and 5 pixels tall
-      fillColor: Colors.green,
-      borderColor: Colors.black,
+      fillColor: green,
+      borderColor: black,
       borderWidth: 1.0,
       anchor: Anchor.topLeft,
     );
