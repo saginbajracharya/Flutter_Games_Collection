@@ -1,0 +1,429 @@
+1) Level Selection map
+    - Single Page with Dynamic Level Loading
+    - Separate Pages or Scenes for Each Level
+
+// TOWERS
+[
+  {
+    "name": "Basic Archer Tower",
+    "price": 100,
+    "range": 150,
+    "description": "A simple tower with moderate attack speed and damage. Effective against early waves of enemies."
+  },
+  {
+    "name": "Mage Tower",
+    "price": 200,
+    "range": 175,
+    "description": "Deals magical damage, effective against armored enemies. Can hit multiple targets with splash damage."
+  },
+  {
+    "name": "Cannon Tower",
+    "price": 300,
+    "range": 130,
+    "description": "Fires powerful cannonballs that deal area-of-effect damage. Slow firing rate but high impact."
+  },
+  {
+    "name": "Poison Tower",
+    "price": 250,
+    "range": 140,
+    "description": "Shoots poisoned darts that deal damage over time. Ideal for weakening groups of enemies."
+  },
+  {
+    "name": "Ice Tower",
+    "price": 350,
+    "range": 160,
+    "description": "Slows down enemies with each hit. Useful for crowd control and combining with other towers."
+  },
+  {
+    "name": "Lightning Tower",
+    "price": 400,
+    "range": 180,
+    "description": "Strikes multiple enemies with chain lightning. Fast attack speed and effective against swarms."
+  },
+  {
+    "name": "Sniper Tower",
+    "price": 450,
+    "range": 250,
+    "description": "Long-range tower with high single-target damage. Ideal for taking out strong enemies from afar."
+  },
+  {
+    "name": "Bomb Tower",
+    "price": 500,
+    "range": 120,
+    "description": "Launches explosive bombs that deal massive area-of-effect damage. Effective against large groups."
+  },
+  {
+    "name": "Tesla Coil",
+    "price": 550,
+    "range": 160,
+    "description": "Continuously zaps nearby enemies with electricity. High attack speed and effective at close range."
+  },
+  {
+    "name": "Flamethrower Tower",
+    "price": 600,
+    "range": 110,
+    "description": "Sprays a cone of fire, dealing consistent damage to all enemies within range. Effective against swarms."
+  },
+  {
+    "name": "Artillery Tower",
+    "price": 700,
+    "range": 200,
+    "description": "Fires heavy shells with long cooldowns but immense damage. Can devastate clusters of enemies."
+  },
+  {
+    "name": "Rocket Tower",
+    "price": 750,
+    "range": 190,
+    "description": "Launches guided rockets that track and explode on enemies. Good for fast-moving targets."
+  },
+  {
+    "name": "Laser Tower",
+    "price": 800,
+    "range": 220,
+    "description": "Fires a continuous laser beam that deals constant damage. Effective against high-health targets."
+  },
+  {
+    "name": "Crystal Tower",
+    "price": 900,
+    "range": 170,
+    "description": "Shoots shards of crystal that pierce through enemies. Can hit multiple targets in a line."
+  },
+  {
+    "name": "Storm Tower",
+    "price": 1000,
+    "range": 210,
+    "description": "Summons storms that strike random enemies within range. High damage but unpredictable targeting."
+  },
+  {
+    "name": "Healing Tower",
+    "price": 500,
+    "range": 140,
+    "description": "Heals nearby friendly units over time. Essential for keeping defensive units alive."
+  },
+  {
+    "name": "Acid Tower",
+    "price": 650,
+    "range": 150,
+    "description": "Sprays acid that reduces enemy armor and deals damage over time. Weakens enemies for other towers."
+  },
+  {
+    "name": "Spike Trap Tower",
+    "price": 300,
+    "range": 100,
+    "description": "Deals damage to enemies passing through its range. Passive damage that complements other towers."
+  },
+  {
+    "name": "Sun Tower",
+    "price": 950,
+    "range": 230,
+    "description": "Fires beams of concentrated sunlight, dealing massive damage to single targets. High energy cost."
+  },
+  {
+    "name": "Shadow Tower",
+    "price": 800,
+    "range": 180,
+    "description": "Fires shadow bolts that reduce enemy speed and attack. Effective for weakening and controlling enemies."
+  },
+  {
+    "name": "Gatling Gun Tower",
+    "price": 750,
+    "range": 130,
+    "description": "Rapid-fire bullets with a high rate of fire but moderate damage. Excellent for handling swarms."
+  },
+  {
+    "name": "Frost Tower",
+    "price": 900,
+    "range": 160,
+    "description": "Slows and damages enemies with icy projectiles. Combines well with high-damage towers."
+  },
+  {
+    "name": "Dragon Tower",
+    "price": 1100,
+    "range": 220,
+    "description": "Unleashes fiery breath that deals continuous damage to all enemies in a cone. Devastating but expensive."
+  },
+  {
+    "name": "Toxic Gas Tower",
+    "price": 650,
+    "range": 150,
+    "description": "Emits toxic gas clouds that linger and deal damage over time. Good for area denial and crowd control."
+  },
+  {
+    "name": "Meteor Tower",
+    "price": 1200,
+    "range": 240,
+    "description": "Calls down meteors that deal massive area-of-effect damage. Long cooldown but devastating impact."
+  }
+]
+
+
+//ENEMIES
+[
+  {
+    "enemyName": "Goblin",
+    "speed": 1.2,
+    "enemyHealth": 50,
+    "reward": 5
+  },
+  {
+    "enemyName": "Orc",
+    "speed": 0.8,
+    "enemyHealth": 100,
+    "reward": 10
+  },
+  {
+    "enemyName": "Troll",
+    "speed": 0.6,
+    "enemyHealth": 200,
+    "reward": 20
+  },
+  {
+    "enemyName": "Wolf Rider",
+    "speed": 1.5,
+    "enemyHealth": 75,
+    "reward": 8
+  },
+  {
+    "enemyName": "Dark Mage",
+    "speed": 1.0,
+    "enemyHealth": 150,
+    "reward": 15
+  },
+  {
+    "enemyName": "Skeleton",
+    "speed": 1.0,
+    "enemyHealth": 60,
+    "reward": 6
+  },
+  {
+    "enemyName": "Zombie",
+    "speed": 0.5,
+    "enemyHealth": 120,
+    "reward": 12
+  },
+  {
+    "enemyName": "Vampire",
+    "speed": 1.3,
+    "enemyHealth": 90,
+    "reward": 9
+  },
+  {
+    "enemyName": "Golem",
+    "speed": 0.4,
+    "enemyHealth": 300,
+    "reward": 30
+  },
+  {
+    "enemyName": "Dragon Whelp",
+    "speed": 1.0,
+    "enemyHealth": 200,
+    "reward": 25
+  },
+  {
+    "enemyName": "Ghost",
+    "speed": 1.4,
+    "enemyHealth": 80,
+    "reward": 10
+  },
+  {
+    "enemyName": "Harpy",
+    "speed": 1.6,
+    "enemyHealth": 70,
+    "reward": 7
+  },
+  {
+    "enemyName": "Lich",
+    "speed": 1.0,
+    "enemyHealth": 220,
+    "reward": 22
+  },
+  {
+    "enemyName": "Ogre",
+    "speed": 0.7,
+    "enemyHealth": 250,
+    "reward": 25
+  },
+  {
+    "enemyName": "Giant Spider",
+    "speed": 1.1,
+    "enemyHealth": 110,
+    "reward": 11
+  },
+  {
+    "enemyName": "Wraith",
+    "speed": 1.3,
+    "enemyHealth": 90,
+    "reward": 9
+  },
+  {
+    "enemyName": "Necromancer",
+    "speed": 1.0,
+    "enemyHealth": 180,
+    "reward": 18
+  },
+  {
+    "enemyName": "Cyclops",
+    "speed": 0.9,
+    "enemyHealth": 280,
+    "reward": 28
+  },
+  {
+    "enemyName": "Banshee",
+    "speed": 1.2,
+    "enemyHealth": 100,
+    "reward": 10
+  },
+  {
+    "enemyName": "Minotaur",
+    "speed": 1.0,
+    "enemyHealth": 240,
+    "reward": 24
+  },
+  {
+    "enemyName": "Fire Elemental",
+    "speed": 1.1,
+    "enemyHealth": 200,
+    "reward": 20
+  },
+  {
+    "enemyName": "Ice Elemental",
+    "speed": 1.1,
+    "enemyHealth": 200,
+    "reward": 20
+  },
+  {
+    "enemyName": "Dark Knight",
+    "speed": 1.0,
+    "enemyHealth": 260,
+    "reward": 26
+  },
+  {
+    "enemyName": "Demon",
+    "speed": 1.2,
+    "enemyHealth": 230,
+    "reward": 23
+  },
+  {
+    "enemyName": "Phoenix",
+    "speed": 1.5,
+    "enemyHealth": 150,
+    "reward": 15
+  }
+]
+
+
+//SKILLS
+[
+  {
+    "skillName": "Airstrike",
+    "description": "Calls in an airstrike that deals massive damage to a targeted area.",
+    "cooldown": 30,
+    "unlockCost": 100
+  },
+  {
+    "skillName": "Freeze",
+    "description": "Freezes all enemies on the battlefield for a few seconds.",
+    "cooldown": 45,
+    "unlockCost": 120
+  },
+  {
+    "skillName": "Healing Wave",
+    "description": "Heals all friendly units and towers within range.",
+    "cooldown": 40,
+    "unlockCost": 110
+  },
+  {
+    "skillName": "Meteor Shower",
+    "description": "Summons a meteor shower that damages all enemies in a large area.",
+    "cooldown": 60,
+    "unlockCost": 150
+  },
+  {
+    "skillName": "Shield",
+    "description": "Grants temporary invincibility to all friendly units and towers within range.",
+    "cooldown": 50,
+    "unlockCost": 130
+  },
+  {
+    "skillName": "Poison Cloud",
+    "description": "Releases a poison cloud that deals damage over time to all enemies within its range.",
+    "cooldown": 35,
+    "unlockCost": 90
+  },
+  {
+    "skillName": "Summon Reinforcements",
+    "description": "Summons additional units to help defend against the enemy waves.",
+    "cooldown": 55,
+    "unlockCost": 140
+  },
+  {
+    "skillName": "Lightning Strike",
+    "description": "Calls down a lightning strike that targets the strongest enemy, dealing high damage.",
+    "cooldown": 30,
+    "unlockCost": 100
+  },
+  {
+    "skillName": "Berserk",
+    "description": "Increases the attack speed and damage of all towers for a short duration.",
+    "cooldown": 45,
+    "unlockCost": 120
+  },
+  {
+    "skillName": "Black Hole",
+    "description": "Creates a black hole that pulls in and damages all enemies in its range.",
+    "cooldown": 60,
+    "unlockCost": 150
+  },
+  {
+    "skillName": "Time Warp",
+    "description": "Slows down time, reducing the speed of all enemies for a few seconds.",
+    "cooldown": 50,
+    "unlockCost": 130
+  },
+  {
+    "skillName": "Teleport",
+    "description": "Teleports the farthest enemy back to the start of the path.",
+    "cooldown": 40,
+    "unlockCost": 110
+  },
+  {
+    "skillName": "Earthquake",
+    "description": "Causes an earthquake that stuns and damages all enemies on the battlefield.",
+    "cooldown": 55,
+    "unlockCost": 140
+  },
+  {
+    "skillName": "Firestorm",
+    "description": "Unleashes a storm of fire that burns all enemies in a large area.",
+    "cooldown": 60,
+    "unlockCost": 150
+  },
+  {
+    "skillName": "Wind Gust",
+    "description": "Blows back all enemies, pushing them further down the path.",
+    "cooldown": 35,
+    "unlockCost": 90
+  }
+]
+
+//Levels
+{
+  "levels": [
+    {
+      "levelNumber": 1,
+      "map": "map1",
+      "waves": [
+        { "enemies": ["Goblin", "Orc"], "count": [10, 5], "spawnRate": 2 },
+        { "enemies": ["Troll"], "count": [3], "spawnRate": 5 }
+      ]
+    },
+    {
+      "levelNumber": 2,
+      "map": "map2",
+      "waves": [
+        { "enemies": ["Wolf Rider", "Dark Mage"], "count": [8, 4], "spawnRate": 3 },
+        { "enemies": ["Golem"], "count": [2], "spawnRate": 6 }
+      ]
+    }
+  ]
+}
