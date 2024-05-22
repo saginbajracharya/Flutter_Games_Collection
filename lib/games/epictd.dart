@@ -127,6 +127,22 @@ class _EpicTdMenuPageState extends State<EpicTdMenuPage> {
 }
 
 class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
+  final towerSelection = TowerSelection([
+    TowerData('archer', 'epictd/tower_1.png', 100,80),
+    TowerData('gun', 'epictd/tower_2.png', 150,90),
+    TowerData('cannon', 'epictd/tower_2.png', 150,120),
+    TowerData('mage', 'epictd/tower_2.png', 150,80),
+    TowerData('poison', 'epictd/tower_2.png', 150,80),
+    TowerData('ice', 'epictd/tower_2.png', 150,100),
+    TowerData('tesla', 'epictd/tower_2.png', 150,90),
+    TowerData('sniper', 'epictd/tower_2.png', 150,160),
+    TowerData('bomb', 'epictd/tower_1.png', 100,90),
+    TowerData('flamethrower', 'epictd/tower_2.png', 150,90),
+    TowerData('artillery', 'epictd/tower_2.png', 150,140),
+    TowerData('rocket', 'epictd/tower_2.png', 150,140),
+    TowerData('laser', 'epictd/tower_2.png', 150,140),
+  ]);
+
   double zoom = 1.0; // Initial zoom level
   double minZoom = 0.5; // Minimum zoom level
   double maxZoom = 2.0; // Maximum zoom level
@@ -141,17 +157,6 @@ class EpicTd extends FlameGame with TapCallbacks,HasCollisionDetection {
   int _enemyHealth = 100; // Base health of enemies
   int _enemySpeed = 50; // Base speed of enemies
   String _selectedTowerType = 'default';
-  final towerSelection = TowerSelection([
-    TowerData('archer', 'epictd/tower_1.png', 100,80),
-    TowerData('cannon', 'epictd/tower_2.png', 150,60),
-    TowerData('1', 'epictd/tower_2.png', 150,90),
-    TowerData('2', 'epictd/tower_2.png', 150,120),
-    TowerData('3', 'epictd/tower_2.png', 150,110),
-    TowerData('4', 'epictd/tower_2.png', 150,85),
-    TowerData('5', 'epictd/tower_2.png', 150,40),
-    TowerData('6', 'epictd/tower_1.png', 100,90),
-    TowerData('7', 'epictd/tower_2.png', 150,30),
-  ]);
   late GoalComponent goal;
   final ValueNotifier<int> playerHealthNotifier = ValueNotifier<int>(100);
   int defaultReducePlayerHealth = 1;
