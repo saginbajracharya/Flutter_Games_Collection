@@ -24,14 +24,21 @@ flutter:
 
   assets:
     - assets/
-    - assets/audio/
+    - assets/fonts/
     - assets/images/
     - assets/images/common/
     - assets/images/common/ui/
     - assets/images/emberquest/
     - assets/images/epictd/
+    - assets/images/pushpuzzle/
+    - assets/images/charactermovement/
     - assets/images/spaceshooter/bullet/
     - assets/images/spaceshooter/player/
     - assets/images/spaceshooter/enemies/
     - assets/images/spaceshooter/explosions/
     - assets/images/spaceshooter/parallexBg/
+
+  fonts:
+    - family: OldGameFatty
+      fonts:
+        - asset: assets/fonts/OldGameFatty.ttf

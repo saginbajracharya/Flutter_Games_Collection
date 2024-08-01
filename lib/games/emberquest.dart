@@ -36,8 +36,8 @@ class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
         children: [
           // Title
           Text(
-            'Ember Quest',
-            style: headingTextStyle,
+            'game2Title'.tr,
+            style: textHugeWhite(),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 100),
@@ -92,16 +92,16 @@ class _EmberQuestMenuPageState extends State<EmberQuestMenuPage> {
           const SizedBox(height: 50),
           // High Score
           Obx(()=> Text(
-              'High Score : ${scoreStateManager.savedEmberQuesthighscore()}',
-              style: headingTextStyle,
+              '${'highScore'.tr}${scoreStateManager.savedEmberQuesthighscore()}',
+              style: textExtraLargeWhite(),
               textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 50),
           Text(
-            'Use WASD or Arrow Keys for movement.\nSpace bar to jump.\nCollect as many stars as you can and avoid enemies!',
+            'game2Instruction'.tr,
             textAlign: TextAlign.center,
-            style: normalTextStyle
+            style: textLargeWhite()
           ),
         ],
       ),
@@ -620,7 +620,7 @@ class Hud extends PositionComponent with HasGameReference<EmberQuest> {
       textRenderer: TextPaint(
         style: const TextStyle(
           fontSize: 32,
-          color: Color.fromRGBO(10, 10, 10, 1),
+          color: black,
         ),
       ),
       anchor: Anchor.center,
@@ -680,11 +680,11 @@ class GameOver extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const blackTextColor = Color.fromRGBO(0, 0, 0, 1.0);
-    const whiteTextColor = Color.fromRGBO(255, 255, 255, 1.0);
+    const blackTextColor = black;
+    const whiteTextColor = white;
 
     return Material(
-      color: Colors.transparent,
+      color: transparent,
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(10.0),
@@ -698,9 +698,9 @@ class GameOver extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Game Over',
-                style: TextStyle(
+              Text(
+                'gameOver'.tr,
+                style: const TextStyle(
                   color: whiteTextColor,
                   fontSize: 24,
                 ),
@@ -717,9 +717,9 @@ class GameOver extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: whiteTextColor,
                   ),
-                  child: const Text(
-                    'Play Again',
-                    style: TextStyle(
+                  child: Text(
+                    'playAgain'.tr,
+                    style: const TextStyle(
                       fontSize: 28.0,
                       color: blackTextColor,
                     ),
@@ -738,9 +738,9 @@ class GameOver extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: whiteTextColor,
                   ),
-                  child: const Text(
-                    'Menu',
-                    style: TextStyle(
+                  child: Text(
+                    'menu'.tr,
+                    style: const TextStyle(
                       fontSize: 28.0,
                       color: blackTextColor,
                     ),

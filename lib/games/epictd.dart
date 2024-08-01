@@ -44,8 +44,8 @@ class _EpicTdMenuPageState extends State<EpicTdMenuPage> {
         children: [
           // Title
           Text(
-            'Epic TD',
-            style: headingTextStyle,
+            'game3Title'.tr,
+            style: textExtraLargeWhite(),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 100),
@@ -115,8 +115,8 @@ class _EpicTdMenuPageState extends State<EpicTdMenuPage> {
           const SizedBox(height: 50),
           // Total Coin
           Obx(()=> Text(
-              'Coin : ${scoreStateManager.savedSpaceShooterhighscore()}',
-              style: headingTextStyle,
+              '${'coin'.tr}${scoreStateManager.savedSpaceShooterhighscore()}',
+              style: textExtraLargeWhite(),
               textAlign: TextAlign.center,
             ),
           ),
@@ -648,7 +648,7 @@ class _HudOverlayWidgetState extends State<HudOverlayWidget> {
               valueListenable: widget.game.playerHealthNotifier,
               builder: (context, health, child) {
                 return Text(
-                  'Health: $health',
+                  '${'health'.tr}$health',
                   style: const TextStyle(
                     fontSize: 20,
                     color: white,
@@ -667,7 +667,7 @@ class _HudOverlayWidgetState extends State<HudOverlayWidget> {
               valueListenable: widget.game.totalCoin,
               builder: (context, totalCoin, child) {
                 return Text(
-                  'Coin: $totalCoin',
+                  '${'coin'.tr}$totalCoin',
                   style: const TextStyle(
                     fontSize: 10,
                     color: white,
@@ -775,11 +775,11 @@ class _HudOverlayWidgetState extends State<HudOverlayWidget> {
                               ),
                               Text(
                                 tower.type,
-                                style: smallTextStyleBlack,
+                                style: textExtraSmallBlack(),
                               ),
                               Text(
                                 'r : ${tower.range}',
-                                style: smallTextStyleBlack,
+                                style: textExtraSmallBlack(),
                               )
                             ],
                           ),

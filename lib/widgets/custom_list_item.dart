@@ -15,21 +15,41 @@ class CustomListItem extends StatefulWidget {
 class _CustomListItemState extends State<CustomListItem> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(
-        maxWidth: 200,
-      ),
-      child: ListTile(
-        dense: false,
-        contentPadding: EdgeInsets.zero,
-        leading: Text(widget.trailingText,style: normalTextStyle,textAlign: TextAlign.start),
-        title: Text(widget.titleText,style: normalTextStyle,textAlign: TextAlign.start),
-        visualDensity: VisualDensity.comfortable,
-        minVerticalPadding: 0,
-        horizontalTitleGap: 0,
-        minLeadingWidth: 40,
-        isThreeLine: false,
-        onTap: widget.onTap,
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              flex: 1,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  const SizedBox(),
+                  Text(widget.trailingText,style: textSmallWhite(),textAlign: TextAlign.start),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(width: 20),
+                  Text(widget.titleText,style: textSmallWhite(),textAlign: TextAlign.start),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

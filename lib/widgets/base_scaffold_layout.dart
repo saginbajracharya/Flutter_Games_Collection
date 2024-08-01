@@ -3,19 +3,33 @@ import 'package:flutter_games_collection/common/styles.dart';
 
 // Base Scaffold Layout for All Pages
 class BaseScaffoldLayout extends StatelessWidget {
-  const BaseScaffoldLayout({super.key,required this.child});
+  const BaseScaffoldLayout({super.key,required this.child,this.appbar, this.extendBehindAppBar, this.showScrollBar});
   final Widget child;
+  final AppBar? appbar;
+  final bool? extendBehindAppBar;
+  final bool? showScrollBar;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: scaffoldBgColor,
+      extendBodyBehindAppBar: extendBehindAppBar??false,
+      appBar: appbar,
       body: Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         padding: const EdgeInsets.all(10),
         alignment: Alignment.center,
-        child: SingleChildScrollView(
+        child: showScrollBar==true
+        ?Scrollbar(
+          interactive: true,
+          thickness: 10,
+          radius: const Radius.circular(8),
+          child: SingleChildScrollView(
+            child: child,
+          ),
+        )
+        : SingleChildScrollView(
           child: child,
         ),
       ),

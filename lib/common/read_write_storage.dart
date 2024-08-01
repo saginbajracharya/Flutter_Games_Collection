@@ -6,6 +6,7 @@ class StorageKeys {
   static const String highScoreSpaceShooterKey = 'spaceshooterhighscore';
   static const String highScoreEmberQuestKey   = 'emberquesthighscore';
   static const String epicTdCoinKey            = 'epicTdCoin';
+  static const String selectedLocaleKey        = 'selectedLocale';
 }
 
 read(String storageName){

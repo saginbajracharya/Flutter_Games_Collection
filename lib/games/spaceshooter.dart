@@ -45,8 +45,8 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
         children: [
           // Title
           Text(
-            'Space Shooter',
-            style: headingTextStyle,
+            'game1Title'.tr,
+            style: textHugeWhite(),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 100),
@@ -60,7 +60,7 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
                     overlayBuilderMap: {
                       'ScoreOverlay': (context, game) {
                         return Padding(
-                          padding: const EdgeInsets.only(top:10),
+                          padding: const EdgeInsets.only(top:40),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -93,10 +93,10 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
                                 child: Obx(() => Padding(
                                   padding: const EdgeInsets.only(top:12.0),
                                   child: Text(
-                                      'Score : ${scoreStateManager.spaceShooterScore}',
-                                      style: normalTextStyle,
-                                      textAlign: TextAlign.center,
-                                    ),
+                                    '${'score'.tr}${scoreStateManager.spaceShooterScore}',
+                                    style: textSmallWhite(),
+                                    textAlign: TextAlign.center,
+                                  ),
                                 ),
                                 ),
                               ),
@@ -174,8 +174,8 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
           const SizedBox(height: 50),
           // High Score
           Obx(()=> Text(
-              'High Score : ${scoreStateManager.savedSpaceShooterhighscore()}',
-              style: headingTextStyle,
+              '${'highScore'.tr} ${scoreStateManager.savedSpaceShooterhighscore()}',
+              style: textSmallWhite(),
               textAlign: TextAlign.center,
             ),
           ),
