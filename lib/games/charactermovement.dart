@@ -4,12 +4,15 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame/sprite.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_games_collection/common/constant.dart';
 import 'package:flutter_games_collection/common/styles.dart';
 import 'package:flutter_games_collection/widgets/base_scaffold_layout.dart';
 import 'package:get/get.dart';
+
+enum Direction { up, down, left, right, none }
 
 class CharacterMovementMenuPage extends StatefulWidget {
   const CharacterMovementMenuPage({super.key});
@@ -19,6 +22,7 @@ class CharacterMovementMenuPage extends StatefulWidget {
 }
 
 class _CharacterMovementMenuPageState extends State<CharacterMovementMenuPage> {
+  final gameInstance = Charactermovement();
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +47,14 @@ class _CharacterMovementMenuPageState extends State<CharacterMovementMenuPage> {
                   body : Stack(
                     children: [
                       GameWidget(
-                        game: Charactermovement(),
+                        game: gameInstance,
+                        overlayBuilderMap: {
+                          'HudOverlay': (BuildContext context , Charactermovement game){
+                              return HudOverlayWidget(game: game);
+                          }
+                        },
+                        initialActiveOverlays: const ['HudOverlay'],
                       ),
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(32.0),
-                          child: Joypad(onDirectionChanged: Charactermovement().onJoyPadDirectionChanged),
-                        ),
-                      )
                     ],
                   )
                 )
@@ -128,16 +131,19 @@ class Charactermovement extends FlameGame with KeyboardEvents {
     } else if (_player.direction == keyDirection) {
       _player.direction = Direction.none;
     }
-
+    if (kDebugMode) {
+      print('Current Direction == >  $keyDirection');
+    }
     return super.onKeyEvent(event, keysPressed);
   }
 
   void onJoyPadDirectionChanged(Direction direction) {
+    if (kDebugMode) {
+      print('Current Direction == >  $direction');
+    }
     _player.direction = direction;
   }
 }
-
-enum Direction { up, down, left, right, none }
 
 class Joypad extends StatefulWidget {
   final ValueChanged<Direction>? onDirectionChanged;
@@ -323,5 +329,44 @@ class Player extends SpriteAnimationComponent with HasGameRef {
 
   void moveRight(double delta) {
     position.add(Vector2(delta * _playerSpeed, 0));
+  }
+}
+
+class HudOverlayWidget extends StatefulWidget {
+  final Charactermovement game;
+
+  const HudOverlayWidget({super.key, required this.game});
+
+  @override
+  State<HudOverlayWidget> createState() => _HudOverlayWidgetState();
+}
+
+class _HudOverlayWidgetState extends State<HudOverlayWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Back button at the top-center, offset to the right
+        Positioned(
+          top: kBottomNavigationBarHeight,
+          right: 10,
+          child: GestureDetector(
+            onTap: () => Get.back(),
+            child: Image.asset(
+              'assets/images/common/ui/Back_Button_Circle.png',
+              width: 50,
+              height: 50,
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.all(32.0),
+            child: Joypad(onDirectionChanged: widget.game.onJoyPadDirectionChanged),
+          ),
+        )
+      ],
+    );
   }
 }
