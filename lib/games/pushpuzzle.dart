@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_games_collection/common/constant.dart';
@@ -7,6 +6,7 @@ import 'package:flutter_games_collection/common/styles.dart';
 import 'package:flutter_games_collection/widgets/base_scaffold_layout.dart';
 import 'package:get/get.dart';
 import 'package:flame/components.dart' hide Timer;
+import 'package:flame/flame.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/services.dart';
@@ -14,8 +14,10 @@ import 'dart:async';
 import 'package:flame/effects.dart';
 import 'package:flame/sprite.dart';
 
+enum Direction { up, down, left, right, none }
 const double oneBlockSize = 64.0;
 const int playerCameraWallWidth = 20;
+dynamic screenSize = 0.0;
 
 class PushPuzzleMenuPage extends StatefulWidget {
   const PushPuzzleMenuPage({super.key});
@@ -28,6 +30,8 @@ class _PushPuzzleMenuPageState extends State<PushPuzzleMenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Call the function and pass the context
+    printScreenSize(context);
     return BaseScaffoldLayout(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -50,7 +54,7 @@ class _PushPuzzleMenuPageState extends State<PushPuzzleMenuPage> {
                     game: PushPuzzleGame(),
                     overlayBuilderMap: {
                       'HudOverlay': (BuildContext context , PushPuzzleGame game){
-                          return HudOverlayWidget(game: game);
+                        return HudOverlayWidget(game: game);
                       }
                     },
                     initialActiveOverlays: const ['HudOverlay'],
@@ -100,6 +104,10 @@ class _PushPuzzleMenuPageState extends State<PushPuzzleMenuPage> {
   }
 }
 
+void printScreenSize(BuildContext context) {
+  screenSize = MediaQuery.of(context).size;
+}
+
 class PushPuzzleGame extends FlameGame with KeyboardEvents, HasGameRef {
   late Function stateCallbackHandler;
 
@@ -111,8 +119,10 @@ class PushPuzzleGame extends FlameGame with KeyboardEvents, HasGameRef {
   late Map<String, Sprite> _spriteMap;
   late Sprite _floorSprite;
 
+  double scaleFactor = 1.0;
+
   @override
-  Color backgroundColor() => black;
+  Color backgroundColor() => blue;
 
   @override
   Future<void> onLoad() async {
@@ -124,13 +134,25 @@ class PushPuzzleGame extends FlameGame with KeyboardEvents, HasGameRef {
       '#': blockSprite,
       '.': goalSprite,
     };
-    camera.viewfinder.anchor = Anchor.center;
     await draw();
   }
 
   void setCallback(Function fn) => stateCallbackHandler = fn;
 
   Future<void> draw() async {
+    // final levelWidth = pushGame.state.width.toDouble();
+    // final levelHeight = pushGame.state.height.toDouble();
+    await Flame.device.fullScreen();
+
+    // final screenSize = screenSize;
+
+    // // Calculate the scale factor to fit the level on the screen
+    // scaleFactor = screenSize.width / (levelWidth * oneBlockSize);
+
+    // if (scaleFactor * levelHeight * oneBlockSize > screenSize.height) {
+    //   scaleFactor = screenSize.height / (levelHeight * oneBlockSize);
+    // }
+    
     for (var y = 0; y < pushGame.state.splitStageStateList.length; y++) {
       final row = pushGame.state.splitStageStateList[y];
       final firstWallIndex = row.indexOf('#');
@@ -458,8 +480,6 @@ ColorEffect customColorEffect = ColorEffect(
   ),
 );
 
-enum Direction { up, down, left, right, none }
-
 Vector2 getMoveDirection(String input) {
   double dx, dy;
   dx = dy = 0;
@@ -516,10 +536,10 @@ const List<String> stageMasterDataList = [
   ########
   #   #  #
   # p    #
-  # ###.#
-  # o   #
-  #   ###
-  #####  
+  ## ###.#
+   # o   #
+   #   ###
+   #####  
   ''',
   '''
   #####   
@@ -859,8 +879,9 @@ class _HudOverlayWidgetState extends State<HudOverlayWidget> {
             ),
           ),
         ),
-        Platform.isIOS||Platform.isAndroid
-        ?Positioned(
+        // Platform.isIOS||Platform.isAndroid
+        // ?
+        Positioned(
           bottom: 20,
           left: 20,
           child: Column(
@@ -891,7 +912,7 @@ class _HudOverlayWidgetState extends State<HudOverlayWidget> {
             ],
           ),
         )
-        :const SizedBox(),
+        // :const SizedBox(),
       ],
 
     );
