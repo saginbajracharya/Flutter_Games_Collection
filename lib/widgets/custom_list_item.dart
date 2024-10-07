@@ -15,17 +15,11 @@ class CustomListItem extends StatefulWidget {
 class _CustomListItemState extends State<CustomListItem> {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width*0.16 
-          ),
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.all(10.0),
-          child: Text("${widget.trailingText}   ${widget.titleText}",style: textSmallWhite(),textAlign: TextAlign.start),
-        ),
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        padding: const EdgeInsets.only(top:10.0,bottom: 10.0,left:40.0,right:10.0),
+        child: Text("${widget.trailingText}   ${widget.titleText}",style: textSmallWhite(),textAlign: TextAlign.start),
       ),
     );
   }

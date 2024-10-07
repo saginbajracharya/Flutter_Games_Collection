@@ -66,6 +66,7 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisSize: MainAxisSize.max,
                             children: [
+                              // Back Button
                               Align(
                                 alignment: Alignment.topRight,
                                 child: ElevatedButton(
@@ -88,6 +89,7 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
                                   ),
                                 )
                               ),
+                              // Score
                               Align(
                                 alignment: Alignment.topCenter,
                                 child: Obx(() => Padding(
@@ -100,6 +102,7 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
                                 ),
                                 ),
                               ),
+                              // Play/Pause Button
                               Align(
                                 alignment: Alignment.topRight,
                                 child: ElevatedButton(
@@ -225,6 +228,40 @@ class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection
         autoStart: playPauseManager.spaceShooterPaused.value==false?true:false
       ),
     );
+    //Add Rapid Fire Power Up Spawner
+    add(
+      SpawnComponent(
+        factory: (index) {
+          if(playPauseManager.spaceShooterPaused.value)
+          {
+            return PositionComponent();
+          }
+          else{
+            return RapidFirePowerUp();
+          }
+        },
+        period: 5,
+        area: Rectangle.fromLTWH(0, 0, size.x, - Enemy.enemySize),
+        autoStart: playPauseManager.spaceShooterPaused.value==false?true:false
+      ),
+    );
+    //Add Shield Power Up Spawner
+    add(
+      SpawnComponent(
+        factory: (index) {
+          if(playPauseManager.spaceShooterPaused.value)
+          {
+            return PositionComponent();
+          }
+          else{
+            return ShieldPowerUp();
+          }
+        },
+        period: 6,
+        area: Rectangle.fromLTWH(0, 0, size.x, - Enemy.enemySize),
+        autoStart: playPauseManager.spaceShooterPaused.value==false?true:false
+      ),
+    );
   }
 
   @override
@@ -254,7 +291,7 @@ class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection
 // Player starts the center position at the start of a game 
 // Player has a Pan movement and start and stop shooting bullets features 
 // Player has a hitbox so that when the enemy hits the player the Score is Reset
-class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooterGame> {
+class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooterGame>, CollisionCallbacks{
   Player()
   : super(
     size: Vector2(100, 150),
@@ -262,6 +299,17 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
   );
 
   late final SpawnComponent _bulletSpawner;
+
+  // Rapid fire properties
+  bool rapidFireMode = false;
+  double rapidFireDuration = 0.0;
+  final double normalFireRate = 0.3;  // Normal fire rate (time between shots)
+  final double rapidFireRate = 0.1;   // Rapid fire rate (time between shots)
+
+  // Shield properties
+  bool hasShield = false;
+  late Timer shieldTimer;
+  SpriteComponent? shieldVisual;
 
   @override
   Future<void> onLoad() async {
@@ -286,7 +334,7 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
     position = game.size / 2;
 
     _bulletSpawner = SpawnComponent(
-      period: .2,
+      period: normalFireRate,
       selfPositioning: true,
       factory: (index) {
         return Bullet(
@@ -300,6 +348,9 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
       autoStart: false,
     );
     game.add(_bulletSpawner);
+
+    // Initialize shield timer
+    shieldTimer = Timer(0, onTick: disableShield, repeat: false);
   }
 
   @override
@@ -307,6 +358,18 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
     super.update(dt);
     if (playPauseManager.spaceShooterPaused.value==false) {
     }
+    // Check if rapid fire is active and update the timer
+    if (rapidFireMode) {
+      rapidFireDuration -= dt;
+
+      // If the rapid fire time is over, switch back to normal mode
+      if (rapidFireDuration <= 0) {
+        deactivateRapidFire();
+      }
+    }
+
+    // Update shield timer
+    shieldTimer.update(dt);
   }
 
   void move(Vector2 delta) {
@@ -324,6 +387,69 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
   void stopShooting() {
     if (playPauseManager.spaceShooterPaused.value==false) {
       _bulletSpawner.timer.stop();
+    }
+  }
+
+  // Activate rapid fire mode for a specific duration
+  void activateRapidFire(double duration) {
+    rapidFireMode = true;
+    rapidFireDuration = duration;
+    _bulletSpawner.timer.stop();
+    _bulletSpawner.period = rapidFireRate; // Set to rapid fire rate
+    _bulletSpawner.timer.start();
+  }
+
+  // Deactivate rapid fire and switch back to normal fire rate
+  void deactivateRapidFire() {
+    rapidFireMode = false;
+    _bulletSpawner.timer.stop();
+    _bulletSpawner.period = normalFireRate;  // Reset to normal fire rate
+    _bulletSpawner.timer.start();
+  }
+
+  // Method to activate the shield
+  void activateShield(double duration) async{
+    if (!hasShield) {
+      hasShield = true;
+
+      // Add the visual representation of the shield
+      shieldVisual = SpriteComponent(
+        sprite: await game.loadSprite(SpaceShooterAssetsImages.shieldPowerUp),  // Load your shield image asset
+        size: size * 1.5,  // Make the shield larger than the player
+        position: Vector2.zero(),
+        anchor: Anchor.center,
+      );
+
+      add(shieldVisual!);  // Add shield visual to the player
+
+      // Start the shield timer
+      shieldTimer.stop();
+      shieldTimer = Timer(duration, onTick: disableShield, repeat: false);
+      shieldTimer.start();
+    }
+  }
+
+  // Method to disable the shield
+  void disableShield() {
+    if (hasShield) {
+      hasShield = false;
+
+      // Remove the shield visual
+      shieldVisual?.removeFromParent();
+      shieldVisual = null;
+    }
+  }
+
+  @override
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollisionStart(intersectionPoints, other);
+
+    if (hasShield && other is Enemy) {
+      // Prevent damage to the player if the shield is active
+      other.removeFromParent();  // Destroy the enemy on collision when shield is active
     }
   }
 }
@@ -455,5 +581,118 @@ class Explosion extends SpriteAnimationComponent with HasGameReference<SpaceShoo
         loop: false,
       ),
     );
+  }
+}
+
+// Power Ups
+
+// RapidFirePowerUp Sprite Animation Component
+// RapidFirePowerUp are Spawned at the top screen with in the device width at random position of the width at random time 
+class RapidFirePowerUp extends SpriteAnimationComponent with HasGameReference<SpaceShooterGame> ,CollisionCallbacks{
+  RapidFirePowerUp({
+    super.position,
+  }) : super(
+    size: Vector2.all(powerUpSize),
+    anchor: Anchor.center,
+  );
+
+  static const powerUpSize = 50.0;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    animation = await game.loadSpriteAnimation(
+      SpaceShooterAssetsImages.rapidFirePowerUp,
+      SpriteAnimationData.sequenced(
+        amount: 1, // 4 Frame
+        stepTime: 1, // This sets the time interval between displaying each frame of the animation to 0.2 seconds.
+        textureSize: Vector2.all(300),
+      ),
+    );
+
+    add(RectangleHitbox());
+  }
+  
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (playPauseManager.spaceShooterPaused.value==false) {
+      position.y += dt * 250;
+      if (position.y > game.size.y) {
+        removeFromParent();
+      }
+    }
+  }
+
+  @override
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollisionStart(intersectionPoints, other);
+    if (other is Bullet) {
+      // removeFromParent();
+      // other.removeFromParent();
+      // game.add(Explosion(position: position));
+      // // Update score using EventManager
+      // scoreStateManager.updateSpaceShooterScore(scoreStateManager.spaceShooterScore.value+1);
+    }
+    else if (other is Player) {
+      other.activateRapidFire(5.0); // 5 seconds of rapid fire
+      removeFromParent();  // Remove the power-up after collection
+    }
+  }
+}
+
+// ShieldPowerUp Sprite Animation Component
+// ShieldPowerUp are Spawned at the top screen with in the device width at random position of the width at random time 
+class ShieldPowerUp extends SpriteAnimationComponent with HasGameReference<SpaceShooterGame> ,CollisionCallbacks{
+  ShieldPowerUp({
+    super.position,
+  }) : super(
+    size: Vector2.all(powerUpSize),
+    anchor: Anchor.center,
+  );
+
+  static const powerUpSize = 50.0;
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+
+    animation = await game.loadSpriteAnimation(
+      SpaceShooterAssetsImages.shieldPowerUp,
+      SpriteAnimationData.sequenced(
+        amount: 1, // 4 Frame
+        stepTime: 1, // This sets the time interval between displaying each frame of the animation to 0.2 seconds.
+        textureSize: Vector2.all(300),
+      ),
+    );
+
+    add(RectangleHitbox());
+  }
+  
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (playPauseManager.spaceShooterPaused.value==false) {
+      position.y += dt * 250;
+      if (position.y > game.size.y) {
+        removeFromParent();
+      }
+    }
+  }
+
+  @override
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollisionStart(intersectionPoints, other);
+    if (other is Player) {
+      other.activateShield(5.0); // 5 seconds of Shield
+      removeFromParent();  // Remove the power-up after collection
+    }
   }
 }

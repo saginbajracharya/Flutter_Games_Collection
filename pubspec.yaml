@@ -35,6 +35,7 @@ flutter:
     - assets/images/spaceshooter/bullet/
     - assets/images/spaceshooter/player/
     - assets/images/spaceshooter/enemies/
+    - assets/images/spaceshooter/powerUps/
     - assets/images/spaceshooter/explosions/
     - assets/images/spaceshooter/parallexBg/
 

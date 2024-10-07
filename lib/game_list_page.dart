@@ -38,53 +38,60 @@ class _GamesListPageState extends State<GamesListPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Title
           Text('title'.tr,style: textLargeWhite()),
           const SizedBox(height: 20),
           Text('subTitle'.tr,style: textLargeWhite()),
           const SizedBox(height: 50),
-          // Space Shooter
-          CustomListItem(
-            trailingText: '1', 
-            titleText: 'game1Title'.tr, 
-            onTap: () async{  
-              Get.to(()=>const SpaceShooterMenuPage());
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Space Shooter
+              CustomListItem(
+                trailingText: '1', 
+                titleText: 'game1Title'.tr, 
+                onTap: () async{  
+                  Get.to(()=>const SpaceShooterMenuPage());
+                },
+              ),
+              // Ember Quest
+              CustomListItem(
+                trailingText: '2', 
+                titleText: 'game2Title'.tr, 
+                onTap: () async{  
+                  Get.to(()=>const EmberQuestMenuPage());
+                },
+              ),
+              // Epic TD
+              CustomListItem(
+                trailingText: '3', 
+                titleText: 'game3Title'.tr, 
+                onTap: () async{  
+                  Get.to(()=>const EpicTdMenuPage());
+                },
+              ),
+              // Push Puzzle
+              CustomListItem(
+                trailingText: '4', 
+                titleText: 'game4Title'.tr, 
+                onTap: () async{  
+                  Get.to(()=>const PushPuzzleMenuPage());
+                },
+              ),
+              // Character Movement
+              CustomListItem(
+                trailingText: '5', 
+                titleText: 'game5Title'.tr, 
+                onTap: () async{  
+                  Get.to(()=>const CharacterMovementMenuPage());
+                },
+              )
+            ],
           ),
-          // Ember Quest
-          CustomListItem(
-            trailingText: '2', 
-            titleText: 'game2Title'.tr, 
-            onTap: () async{  
-              Get.to(()=>const EmberQuestMenuPage());
-            },
-          ),
-          // Ember Quest
-          CustomListItem(
-            trailingText: '3', 
-            titleText: 'game3Title'.tr, 
-            onTap: () async{  
-              Get.to(()=>const EpicTdMenuPage());
-            },
-          ),
-          // Push Puzzle
-          CustomListItem(
-            trailingText: '4', 
-            titleText: 'game4Title'.tr, 
-            onTap: () async{  
-              Get.to(()=>const PushPuzzleMenuPage());
-            },
-          ),
-          // Character Movement
-          CustomListItem(
-            trailingText: '5', 
-            titleText: 'game5Title'.tr, 
-            onTap: () async{  
-              Get.to(()=>const CharacterMovementMenuPage());
-            },
-          )
         ],
       ) 
     );
