@@ -12,8 +12,12 @@ dependencies:
   get_storage: ^2.1.1
   flutter_gradient_colors: ^2.1.1
   ultimate_particle_fx: ^0.0.1
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1 # Needed for coordinate handling
+  geolocator: ^13.0.1 # To record your travels, you can implement GPS tracking and record the path of your travels on the map.
   flutter:
     sdk: flutter
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
