@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_games_collection/games/charactermovement.dart';
 import 'package:flutter_games_collection/games/epictd.dart';
+import 'package:flutter_games_collection/games/mapquestadventures.dart';
 import 'package:flutter_games_collection/games/pushpuzzle.dart';
 import 'package:flutter_games_collection/settings_page.dart';
 import 'package:get/get.dart';
@@ -141,6 +142,14 @@ class _GamesListPageState extends State<GamesListPage> {
                         titleText: 'game5Title'.tr, 
                         onTap: () async{  
                           Get.to(()=>const CharacterMovementMenuPage());
+                        },
+                      ),
+                      // travel maps
+                      CustomListItem(
+                        trailingText: '6', 
+                        titleText: 'game6Title'.tr, 
+                        onTap: () async{  
+                          Get.to(()=>const MapQuestAdventures());
                         },
                       )
                     ],
