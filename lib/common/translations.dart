@@ -5,7 +5,7 @@ class AppTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en': {
       'title'                                  : 'Flutter Games Collection',
-      'subTitle'                               : '5 in 1',
+      'subTitle'                               : '6 in 1',
       'settings'                               : 'Settings',
       'music'                                  : 'Music',
       'sound'                                  : 'Sound',
@@ -17,6 +17,7 @@ class AppTranslations extends Translations {
       'game3Title'                             : 'Epic TD',
       'game4Title'                             : 'Push Puzzle',
       'game5Title'                             : 'Character Movement',
+      'game6Title'                             : 'MapQuest Adventures',
       'score'                                  : 'Score : ',
       'highScore'                              : 'High Score : ',
       'game2Instruction'                       : 'Use WASD or Arrow Keys for movement.\nSpace bar to jump.\nCollect as many stars as you can and avoid enemies!',
@@ -28,7 +29,7 @@ class AppTranslations extends Translations {
     },
     'jp': {
       'title'                                  : 'フラッター ゲーム コレクション',
-      'subTitle'                               : '五 in 一',
+      'subTitle'                               : '六 in 一',
       'settings'                               : '設定',
       'music'                                  : '音楽',
       'sound'                                  : '音',
@@ -40,6 +41,7 @@ class AppTranslations extends Translations {
       'game3Title'                             : 'Epic TD',
       'game4Title'                             : 'Push Puzzle',
       'game5Title'                             : 'Character Movement',
+      'game6Title'                             : 'MapQuest Adventures',
       'score'                                  : 'スコア : ',
       'highScore'                              : '高得点 : ',
       'game2Instruction'                       : '移動には WASD または矢印キーを使用します。\nスペースバーでジャンプします。\nできるだけ多くの星を集めて敵を避けてください。',
@@ -51,7 +53,7 @@ class AppTranslations extends Translations {
     },
     'np': {
       'title'                                  : 'फ्लटर खेल संग्रह',
-      'subTitle'                               : '५ मा १',
+      'subTitle'                               : 'छ मा १',
       'settings'                               : 'सेटिङहरू',
       'music'                                  : 'संगीत',
       'sound'                                  : 'ध्वनि',
@@ -63,6 +65,7 @@ class AppTranslations extends Translations {
       'game3Title'                             : 'Epic TD',
       'game4Title'                             : 'Push Puzzle',
       'game5Title'                             : 'Character Movement',
+      'game6Title'                             : 'MapQuest Adventures',
       'score'                                  : 'स्कोर : ',
       'highScore'                              : 'उच्च अंक : ',
       'game2Instruction'                       : 'आन्दोलनको लागि WASD वा एरो कुञ्जीहरू प्रयोग गर्नुहोस्।\nजम्प गर्न स्पेस बार।\nतपाईंले सकेसम्म धेरै ताराहरू सङ्कलन गर्नुहोस् र शत्रुहरूबाट जोगिन!',
