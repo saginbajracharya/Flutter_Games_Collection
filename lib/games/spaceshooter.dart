@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:developer';
+import 'dart:math' as math;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -191,6 +193,8 @@ class _SpaceShooterMenuPageState extends State<SpaceShooterMenuPage> {
 // Space Shooter Game Main Logic Here 
 class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection{
   late Player player;
+  late SpawnComponent enemySpawner;
+  double timeElapsed = 0; // Time tracker
 
   @override
   Future<void> onLoad() async {
@@ -212,22 +216,20 @@ class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection
     add(player);
 
     //Add Enemies Spawner
-    add(
-      SpawnComponent(
-        factory: (index) {
-          if(playPauseManager.spaceShooterPaused.value)
-          {
-            return PositionComponent();
-          }
-          else{
-            return Enemy();
-          }
-        },
-        period: 1,
-        area: Rectangle.fromLTWH(0, 0, size.x, - Enemy.enemySize),
-        autoStart: playPauseManager.spaceShooterPaused.value==false?true:false
-      ),
+    enemySpawner = SpawnComponent(
+      factory: (index) {
+        if (playPauseManager.spaceShooterPaused.value) {
+          return PositionComponent();
+        } else {
+          return Enemy();
+        }
+      },
+      period: 2.0,  // Initial spawn period (can be adjusted)
+      area: Rectangle.fromLTWH(0, 0, size.x, -Enemy.enemySize),
+      autoStart: true,
     );
+    add(enemySpawner);
+
     //Add Rapid Fire Power Up Spawner
     add(
       SpawnComponent(
@@ -240,11 +242,12 @@ class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection
             return RapidFirePowerUp();
           }
         },
-        period: 5,
+        period: _getRandomPeriod(),
         area: Rectangle.fromLTWH(0, 0, size.x, - Enemy.enemySize),
         autoStart: playPauseManager.spaceShooterPaused.value==false?true:false
       ),
     );
+
     //Add Shield Power Up Spawner
     add(
       SpawnComponent(
@@ -257,17 +260,43 @@ class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection
             return ShieldPowerUp();
           }
         },
-        period: 6,
+        period: _getRandomPeriod(),
         area: Rectangle.fromLTWH(0, 0, size.x, - Enemy.enemySize),
         autoStart: playPauseManager.spaceShooterPaused.value==false?true:false
       ),
     );
   }
 
+  // Function to generate a random period within the given range
+  double _getRandomPeriod({double minDelay = 15, double maxDelay = 20}) {
+    final random = math.Random();
+    return minDelay + random.nextDouble() * (maxDelay - minDelay);
+  }
+
   @override
   void update(double dt) {
     super.update(dt);
     if (playPauseManager.spaceShooterPaused.value==false) {
+      if(scoreStateManager.spaceShooterScore.value==0){
+        enemySpawner.period = 2;
+        timeElapsed = 0;
+      }
+      else{
+        // Difficulty inscrease as time pass by START // 
+        // Increment elapsed time
+        timeElapsed += dt;
+        // Increase spawn rate over time by decreasing the spawn period
+        double newPeriod = 2.0 - (timeElapsed / 30.0); // Adjust to suit difficulty curve
+        // Make sure the period doesn't go below a minimum threshold
+        if (newPeriod < 0.5) {
+          newPeriod = 0.5; // Minimum spawn period to avoid being too fast
+        }
+        // Update the spawn period
+        enemySpawner.period = newPeriod;
+        // Difficulty inscrease as time pass by END //
+      }
+      log('enemySpawner.period => ${enemySpawner.period}');
+      log('timeElapsed => $timeElapsed');
     }
   }
 
@@ -291,7 +320,7 @@ class SpaceShooterGame extends FlameGame with PanDetector ,HasCollisionDetection
 // Player starts the center position at the start of a game 
 // Player has a Pan movement and start and stop shooting bullets features 
 // Player has a hitbox so that when the enemy hits the player the Score is Reset
-class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooterGame>, CollisionCallbacks{
+class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooterGame>{
   Player()
   : super(
     size: Vector2(100, 150),
@@ -357,24 +386,27 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
   void update(double dt) {
     super.update(dt);
     if (playPauseManager.spaceShooterPaused.value==false) {
-    }
-    // Check if rapid fire is active and update the timer
-    if (rapidFireMode) {
-      rapidFireDuration -= dt;
+      // Check if rapid fire is active and update the timer
+      if (rapidFireMode) {
+        rapidFireDuration -= dt;
 
-      // If the rapid fire time is over, switch back to normal mode
-      if (rapidFireDuration <= 0) {
-        deactivateRapidFire();
+        // If the rapid fire time is over, switch back to normal mode
+        if (rapidFireDuration <= 0) {
+          deactivateRapidFire();
+        }
       }
-    }
 
-    // Update shield timer
-    shieldTimer.update(dt);
+      // Update shield timer
+      shieldTimer.update(dt);
+    }
   }
 
   void move(Vector2 delta) {
     if (playPauseManager.spaceShooterPaused.value==false) {
       position.add(delta);
+      // Clamp the position to keep the player within screen bounds
+      position.x = position.x.clamp(0, game.size.x);   // Restrict horizontal movement considering player's width
+      position.y = position.y.clamp(0, game.size.y);   // Restrict vertical movement considering player's height
     }
   }
 
@@ -414,10 +446,10 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
 
       // Add the visual representation of the shield
       shieldVisual = SpriteComponent(
-        sprite: await game.loadSprite(SpaceShooterAssetsImages.shieldPowerUp),  // Load your shield image asset
-        size: size * 1.5,  // Make the shield larger than the player
-        position: Vector2.zero(),
+        sprite: await game.loadSprite(SpaceShooterAssetsImages.shieldPoweUpActive),  // Load your shield image asset
+        size: Vector2.all(size.x * 1.5),  // Ensure the shield is a perfect circle by making the width and height equal
         anchor: Anchor.center,
+        position: Vector2(size.x / 2, size.y / 2),
       );
 
       add(shieldVisual!);  // Add shield visual to the player
@@ -437,19 +469,6 @@ class Player extends SpriteAnimationComponent with HasGameReference<SpaceShooter
       // Remove the shield visual
       shieldVisual?.removeFromParent();
       shieldVisual = null;
-    }
-  }
-
-  @override
-  void onCollisionStart(
-    Set<Vector2> intersectionPoints,
-    PositionComponent other,
-  ) {
-    super.onCollisionStart(intersectionPoints, other);
-
-    if (hasShield && other is Enemy) {
-      // Prevent damage to the player if the shield is active
-      other.removeFromParent();  // Destroy the enemy on collision when shield is active
     }
   }
 }
@@ -553,7 +572,9 @@ class Enemy extends SpriteAnimationComponent with HasGameReference<SpaceShooterG
       // Update score using EventManager
       game.add(Explosion(position: position));
       removeFromParent(); //remove the enemy from the parent
-      scoreStateManager.updateSpaceShooterScore(0); // Reset The Score
+      if(other.hasShield==false){
+        scoreStateManager.updateSpaceShooterScore(0); // Reset The Score
+      }
     }
   }
 }
@@ -631,14 +652,7 @@ class RapidFirePowerUp extends SpriteAnimationComponent with HasGameReference<Sp
     PositionComponent other,
   ) {
     super.onCollisionStart(intersectionPoints, other);
-    if (other is Bullet) {
-      // removeFromParent();
-      // other.removeFromParent();
-      // game.add(Explosion(position: position));
-      // // Update score using EventManager
-      // scoreStateManager.updateSpaceShooterScore(scoreStateManager.spaceShooterScore.value+1);
-    }
-    else if (other is Player) {
+    if (other is Player) {
       other.activateRapidFire(5.0); // 5 seconds of rapid fire
       removeFromParent();  // Remove the power-up after collection
     }
