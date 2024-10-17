@@ -5,7 +5,7 @@ class AppTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
     'en': {
       'title'                                  : 'Flutter Games Collection',
-      'subTitle'                               : '4 in 1',
+      'subTitle'                               : '5 in 1',
       'settings'                               : 'Settings',
       'music'                                  : 'Music',
       'sound'                                  : 'Sound',
@@ -28,7 +28,7 @@ class AppTranslations extends Translations {
     },
     'jp': {
       'title'                                  : 'フラッター ゲーム コレクション',
-      'subTitle'                               : '四 in 一',
+      'subTitle'                               : '五 in 一',
       'settings'                               : '設定',
       'music'                                  : '音楽',
       'sound'                                  : '音',
@@ -51,7 +51,7 @@ class AppTranslations extends Translations {
     },
     'np': {
       'title'                                  : 'फ्लटर खेल संग्रह',
-      'subTitle'                               : '४ मा १',
+      'subTitle'                               : '५ मा १',
       'settings'                               : 'सेटिङहरू',
       'music'                                  : 'संगीत',
       'sound'                                  : 'ध्वनि',

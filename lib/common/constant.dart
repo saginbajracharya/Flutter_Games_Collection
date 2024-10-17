@@ -1,12 +1,13 @@
 class SpaceShooterAssetsImages{
-  static const parallexBg0      = "spaceshooter/parallexBg/stars_0.png";
-  static const parallexBg1      = "spaceshooter/parallexBg/stars_1.png";
-  static const player           = "spaceshooter/player/player.png";
-  static const enemy            = "spaceshooter/enemies/enemy.png";
-  static const explosion        = "spaceshooter/explosions/explosion.png";
-  static const bullet           = "spaceshooter/bullet/bullet.png";
-  static const rapidFirePowerUp = "spaceshooter/powerUps/rapid_fire.png";
-  static const shieldPowerUp    = "spaceshooter/powerUps/shield.png";
+  static const parallexBg0        = "spaceshooter/parallexBg/stars_0.png";
+  static const parallexBg1        = "spaceshooter/parallexBg/stars_1.png";
+  static const player             = "spaceshooter/player/player.png";
+  static const enemy              = "spaceshooter/enemies/enemy.png";
+  static const explosion          = "spaceshooter/explosions/explosion.png";
+  static const bullet             = "spaceshooter/bullet/bullet.png";
+  static const rapidFirePowerUp   = "spaceshooter/powerUps/rapid_fire.png";
+  static const shieldPowerUp      = "spaceshooter/powerUps/shield.png";
+  static const shieldPoweUpActive = "spaceshooter/powerUps/shield_on.png";
 }
 
 class EmberQuestAssetImages{
