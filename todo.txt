@@ -1,6 +1,159 @@
-1) Level Selection map
-    - Single Page with Dynamic Level Loading
-    - Separate Pages or Scenes for Each Level
++ Splash
++ Game List Page 
++ Game Selected then Game Menu Page
++ Play Button to Game
+
+/////////////////////////////////////////// SPACE SHOOTER START ///////////////////////////////////////////////////////////////
+
+A) Common Game Items
+
+    1 Health Potion
+    - Restores a portion of the player's health.
+
+    2 Mana/Energy Potion
+    - Restores a portion of the player’s mana or energy for abilities.
+
+    3 Ammunition
+    - Provides extra ammo for the player's weapon.
+
+    4 Armor/Shield Pack
+    - Increases the player's armor or shields temporarily or permanently.
+
+    5 Key
+    - Used to unlock doors, chests, or other locked areas.
+
+    6 Treasure Chest
+    - Contains random loot such as weapons, armor, or gold.
+
+    7 Money/Coins/Gold
+    - Collectable currency used to purchase items, upgrades, or weapons.
+
+    8 Weapon Upgrade
+    - Improves the player's current weapon or gives them a new weapon.
+
+    9 Magical Scroll
+    - Grants the player a one-time use of a powerful spell or ability.
+
+    10 Map
+    - Provides information about the current area, revealing hidden locations or objectives.
+
+    11 Experience Orb
+    - Gives the player experience points to level up.
+
+    12 Food
+    - Restores a small amount of health or grants a temporary buff.
+
+    13 Trap Kit
+    - Can be placed by the player to deal damage to enemies.
+
+    14 Speed Boots
+    - Temporarily or permanently increases the player’s movement speed.
+
+    15 Bombs/Explosives
+    - Can be thrown or placed by the player to damage enemies or destroy obstacles.
+
+    16 Grappling Hook
+    - Allows the player to reach distant areas by swinging or pulling themselves.
+
+    17 Medkit/First Aid Kit
+    - Heals a large portion of health, often stored for later use.
+
+    18 Cloak/Invisibility Potion
+    - Grants temporary invisibility or makes the player harder to detect.
+
+    19 Magic Crystal
+    - Can be used to enhance weapons, armor, or abilities with magical properties.
+
+    20 Backpack
+    - Increases the player's inventory space, allowing them to carry more items.
+
+    21 Lockpick
+    - Allows the player to open locked doors or chests without a key.
+
+    22 Antidote
+    - Cures poison or other negative status effects.
+
+    23 Batteries
+    - Used to recharge gadgets or weapons that run on energy.
+
+    24 Compass
+    - Points to the next objective or hidden treasures.
+
+    25 Quest Item
+    - A special item required to complete a specific task or mission (e.g., sacred artifact).
+
+B) Rare/Legendary Items
+
+    1 Legendary Weapon
+    - A powerful and unique weapon that has special abilities.
+
+    2 Rare Gem
+    - Used for crafting high-level upgrades or selling for a large amount of currency.
+
+    3 Relic
+    - Grants the player a permanent, unique ability.
+
+    4 Phoenix Feather
+    - Revives the player after they are defeated.
+
+    5 Time Manipulation Device
+    - Allows the player to slow down or stop time for a brief period.
+
+    6 Sacred Totem
+    - Provides the player with protection from enemies or restores health over time.
+
+    7 Holy Water
+    - Damages or weakens undead enemies, or removes curses.
+
+    8 Artifact of Power
+    - Boosts all of the player’s stats (strength, speed, defense, etc.) temporarily.
+
+C) Consumable Items
+
+    1 Healing Herb
+    - A natural plant that restores health.
+
+    2 Energy Bar
+    - Provides a small boost to health or stamina.
+
+    3 Explosive Barrel
+    - Can be thrown or placed to deal massive area-of-effect damage.
+
+    4 Poison Dagger
+    - A one-time-use item that poisons an enemy.
+
+    5 Smoke Bomb
+    - Allows the player to escape or confuse enemies.
+
+    6 Shield Potion
+    - Temporarily adds extra shields or protection to the player.
+
+    7 Stamina Booster
+    - Refills the player's stamina bar, allowing for faster movement or special actions.
+
+D) Crafting Materials
+
+    1 Wood
+    - Used for crafting structures or items.
+
+    2 Iron Ore
+    - A raw material used to craft weapons, armor, or tools.
+
+    3 Magic Dust
+    - A rare ingredient used in crafting or spell casting.
+
+    4 Leather
+    - Can be used to craft light armor or accessories.
+
+    5 Runes
+    - Used to enhance weapons, spells, or equipment with magical effects.
+
+    6 Herbs/Plants
+    - Collected for crafting potions or healing items.
+
+/////////////////////////////////////////// SPACE SHOOTER END ///////////////////////////////////////////////////////////////
+
+//TOWER DEFENCE
 
 // TOWERS
 [

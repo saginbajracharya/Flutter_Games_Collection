@@ -11,6 +11,7 @@ dependencies:
   get: ^4.6.6
   get_storage: ^2.1.1
   flutter_gradient_colors: ^2.1.1
+  ultimate_particle_fx: ^0.0.1
   flutter:
     sdk: flutter
 
